@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="UTF-8"/>
+	<title>Lib.js - Demos</title>
+<link rel="stylesheet" href="css/reset.css"/>
+<link rel="stylesheet" href="css/styles.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+<script src="data/Lib.js"></script>
+<script src="data/data.js"></script>
+<script>
+window.onload = function() {
+	var canvas = document.getElementsByTagName("canvas");
+	for(var i=0;i<canvas.length;i++) {
+		canvas[i].addEventListener('focus',function() {
+			Site.canvasFocused = true;
+		});
+		canvas[i].addEventListener('blur',function() {
+			Site.canvasFocused = false;
+		});
+	}
+	Lib().setCanvas(canvas[0]);
+	Lib("loader").sprite({
+		src:'graphics/loader.png',
+		size:[128,128],
+		x:'center',
+		y:'center'
+	});
+	Lib().setCanvas(canvas[canvas.length-1]);
+	Lib("guy").sprite({
+		src:"graphics/guy2.png",
+		size:[50,100],
+		position:[0,200],
+		speed:70,
+		frequency:13,
+		x:'center',
+		y:'center'
+	});
+	Lib().load(function() {
+		Lib().addInputRule(function() {
+			var obj = Lib("guy");
+			Lib().stopAnimation(canvas[1]);
+			if(Lib().hasInputKey(39)) {
+				if(obj.getX() >= Lib().canvas.width) obj.setX(-obj.getWidth());
+				obj.setSpriteX(0);
+				obj.setSpriteY(100);
+				obj.reverseAnimation(false);
+				obj.increaseX();
+			}
+			if(Lib().hasInputKey(37)) {
+				if(obj.getX() + obj.getWidth() <= 0) obj.setX(Lib().canvas.width);
+				obj.setSpriteY(0);
+				obj.setSpriteX(0);
+				obj.reverseAnimation(true);
+				obj.decreaseX();
+			}
+			if(Lib().hasInputKey(40)) {
+				if(obj.getY() >= Lib().canvas.height) obj.setY(-obj.getHeight());
+				obj.setSpriteX(0);
+				obj.setSpriteY(200);
+				obj.reverseAnimation(false);
+				obj.increaseY();
+			}
+			if(Lib().hasInputKey(38)) {
+				if(obj.getY() + obj.getHeight() <= 0) obj.setY(Lib().canvas.height);
+				obj.decreaseY();
+				obj.setSpriteX(0);
+				obj.setSpriteY(300);
+				obj.reverseAnimation(false);
+			}
+			if(Lib().hasInput() && (Lib().hasInputKey(39) || Lib().hasInputKey(37) || Lib().hasInputKey(40) || Lib().hasInputKey(38) || Lib().hasInputKey(32))) obj.resumeAnimation();
+			else obj.stopAnimation();
+		});
+	});
+};
+</script>
+</head>
+<body>
+<div id="top">
+	<div id="brand">Lib.js</div><!--#brand-->
+	<div id="menu">
+		<ul>
+			<li data-label="documentation"></li>
+			<li data-label="Thanks For Your Support!"></li>
+			<li data-label="index"></li>
+		</ul>
+	</div><!--#menu-->
+	<div id="contact">
+		<ul>
+			<li data-label="contact"></li>
+		</ul>
+	</div><!--#contact-->
+</div><!--#top-->
+<div id="wrapper">
+	<div class="demo-wrapper" id="demo-wrapper">
+		<div class="doc-box-title">Intro</div><!--.subtitle-->
+		<div class="doc-box-subtitle">Getting Started</div><!--.subtitle-->
+		<div class="doc-box-demo" style="padding:0;">
+			<p class="text">To get started with <span class="libjs">Lib.js</span>, simply place a link to the library in your <samp>&lt;head&gt;</samp> tags.</p>
+		</div><!--.doc-box-demo-->
+		<div class="doc-box-des">
+			<pre>
+			&lt;!--Link the library to yout HTML document.--&gt;
+			&lt;head&gt;
+			  &lt;script src = "path/to/Lib.js"&gt;&lt;/script&gt;
+			&lt;/head&gt;
+			&lt;!--Remember to make sure your code executes either after the page has loaded, or at the bottom of your &lt;body&gt; tags.--&gt;
+			&lt;script&gt;
+			  window.onload = function() {
+			    //place demo codes here.
+			  }
+			&lt;/script&gt;
+			</pre>
+		</div><!--.doc-box-des-->
+		<div class="doc-box-title">Loader Demo</div><!--.subtitle-->
+		<div class="doc-box-subtitle">Simulating .GIF Loaders</div><!--.subtitle-->
+		<div class="doc-box-demo">
+			<p class="demo">Demo.</p>
+			<canvas width="800">
+				<pre>
+					//Your browser does not support HTML5, try upgrading to a newer one!
+				</pre>
+			</canvas>
+		</div><!--.doc-box-demo-->
+		<div class="doc-box-des">
+			<pre>
+			var canvas = document.getElementById("demo-canvas");
+			Lib().setCanvas(canvas);
+			Lib("loader").sprite({      //src: and size: attributes are the only ones required
+			  src:"graphics/loader.png",  //can be found in 'graphics' folder
+			  size:[128,128],      //size of each 'loading' square on the sprite image
+			  frequency:20,      //this is the speed of the 'loading' animation
+			  x:'center',      //takes ints or 'left' 'top' 'center' 'bottom' 'right'
+			  y:'center'
+			});
+			</pre>
+		</div><!--.doc-box-des-->
+		<div class="doc-box-title">Input Demo</div><!--.subtitle-->
+		<div class="doc-box-subtitle">Translating Objects Using the Keyboard</div><!--.subtitle-->
+		<div class="doc-box-demo">
+			<p class="demo">Click to activate demo.</p>
+			<canvas width="800">
+				<pre>
+					//Your browser does not support HTML5, try upgrading to a newer one!
+				</pre>
+			</canvas>
+		</div><!--.doc-box-demo-->
+		<div class="doc-box-des">
+			<pre>
+			//click the demo above and use your keyboard to try it out
+			var canvas = document.getElementById("demo-canvas");
+			Lib().setCanvas(canvas);
+			Lib("guy").sprite({    //src: and size: attributes are the only ones required
+			  src:"graphics/guy.png",  //can be found in 'graphics' folder
+			  size:[50,100],    //size of the 'guy' is 50px in width by 100px in height
+			  position:[0,200],  //coordinates of the first 'guy' on the sprite image
+			  speed:70,    //this is the speed of the guy's movevent
+			  frequency:13,    //this is the speed of the guy's animation
+			  x:'center',    //takes integers or 'left' 'top' 'center' 'bottom' 'right'
+			  y:'center'
+			}); //the sprite image will be read from left to right by default
+			Lib().load(function() {  //wait for our object to be loaded before interacting with it
+			  Lib().addInputRule(function() {
+			    var obj = Lib("guy"); //assign our object to a variable for easier use
+			    Lib().stopAnimation(); //stop animating all of the sprites in the canvas
+			    //if there is more than one canvas, the most recent canvas will be used,
+			    //unless a specific canvas object is passed as a parameter.
+			    if(Lib().hasInputKey(39)) { //this method takes keycodes for now
+			      obj.setSpriteX(0); //reset the sprite image to its first frame
+			      obj.setSpriteY(100); //set to second row of pictures in our sprite
+			      obj.reverseAnimation(false); //must be set to false to undo
+			      obj.increaseX(); //increase x while the 'right' key is pressed
+			    }
+			    if(Lib().hasInputKey(37)) { //37 is the key code for the 'left' arrow key
+			      obj.setSpriteY(0); //first row, first image
+			      obj.setSpriteX(0); //first row, first image
+			      obj.reverseAnimation(true); //this reads the sprite image backwards
+			      obj.decreaseX(); //decrease x as long as this key is being pressed
+			      //outside of an 'if' statement, this would make our object constantly
+			      //decrease in the x direction
+			    }
+			    if(Lib().hasInputKey(40)) {
+			      obj.setSpriteX(0);
+			      obj.setSpriteY(200); //set to third row of images in our sprite
+			      obj.reverseAnimation(false);//in case the sprite is being read backwards
+			      obj.increaseY(); //would move our object 'down' the canvas
+			    }
+			    if(Lib().hasInputKey(38)) {
+			      obj.decreaseY();
+			      obj.setSpriteX(0);
+			      obj.setSpriteY(300);
+			      obj.reverseAnimation(false);
+			    }
+			    if(Lib().hasInput() &amp;&amp; (Lib().hasInputKey(39) || Lib().hasInputKey(37) ||
+			    Lib().hasInputKey(40) || Lib().hasInputKey(38) || Lib().hasInputKey(32)))
+			      obj.resumeAnimation(); //since it's attached to 'obj', it will resume
+			      //animating just that object
+			    else obj.stopAnimation(); //if there is absolutely no input, stop animating it
+
+			    //while there is a key being pressed at all, and the key happens to have a
+			    //key-code between 37 and 40, or 32, animate that individual sprite image, while
+			    //there is no key being pressed, stop just that sprite image. (The rest have
+			    //already been stopped with the global 'Lib().stopAnimation()' towards the
+			    //beginning.
+			  });
+			});
+			</pre>
+		</div><!--.doc-box-des-->
+		<div class="doc-box">
+			<div id="footer" style="padding-bottom:15px;margin-top:10px;">The demos above use <span class="libjs">Lib.js</span> and use resources included in the <b>graphics</b> folder. Feel free to copy the code provided into your own projects. JavaScript key-codes for use in input methods <a href="http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes">can be found here</a>. Send a bug report, feature request,  <a href="mailto:juuanv@gmail.com">or other feedback here.</a></div><!--#footer-->
+		</div><!--.doc-box-->
+	</div><!--.demo-wrapper-->
+</div><!--#wrapper-->
+</body>
+</html>

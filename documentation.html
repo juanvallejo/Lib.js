@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="UTF-8"/>
+	<title>Lib.js - Documentation</title>
+<link rel="stylesheet" href="css/reset.css"/>
+<link rel="stylesheet" href="css/styles.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+<script src="data/Lib.js"></script>
+<script src="data/data.js"></script>
+<script>
+var playing = false;
+var p;
+function demo1(a) {
+	p.style.display = "none";
+	playing = true;
+	Lib().setCanvas(a);
+	Lib("loader").sprite({
+		src:"graphics/loader.png",
+		size:[128,128],
+		frequency:16,
+		x:'center',
+		y:'center'
+	});
+};
+function clearDemo(a) {
+	p.style.display = "block";
+	playing = false;
+	Lib().reset();
+};
+window.onload = function() {
+	var holder = document.getElementById("demo1");
+	var canvas = document.getElementsByTagName("canvas")[0];
+		canvas.tabIndex = 1;
+	p = holder.getElementsByTagName("p")[0];
+	canvas.addEventListener('click',function() {
+		if(playing) clearDemo(canvas);
+		else demo1(canvas);
+	});
+	canvas.addEventListener('blur',function() {
+		if(playing) clearDemo(canvas);
+	});
+};
+</script>
+</head>
+<body>
+<div id="top">
+	<div id="brand">Lib.js</div><!--#brand-->
+	<div id="menu">
+		<ul>
+			<li data-label="documentation"></li>
+			<li data-label="Thanks For Your Support!"></li>
+			<li data-label="index"></li>
+		</ul>
+	</div><!--#menu-->
+	<div id="contact">
+		<ul>
+			<li data-label="contact"></li>
+		</ul>
+	</div><!--#contact-->
+</div><!--#top-->
+<div id="wrapper">
+	<div id="sidebar">
+		<ul>
+			<li>Intro</li>
+			<li>Tutorials</li>
+			<li class="sub1">Basic API Structure</li>
+			<li class="sub1">Complex API Structure</li>
+			<li>Creating Objects</li>
+			<li class="sub1">Setting the Canvas</li>
+			<li class="sub1">Sprite Objects</li>
+			<li class="sub1">Image Objects</li>
+			<li class="sub1">Accessing Objects</li>
+			<li>Drawing Shapes</li>
+			<li>Animation</li>
+			<li class="sub1">Manipulating Frames</li>
+			<li class="sub1">Translating Objects</li>
+			<li class="sub1">Rotating Objects</li>
+			<li>Input</li>
+			<li class="sub1">Adding Input Rules</li>
+			<li class="sub1">Input API</li>
+			<li>APIs</li>
+			<li class="sub1">Shared Methods</li>
+			<li class="sub1">Sprite API</li>
+			<li class="sub1">Line API</li>
+			<li class="sub1">Rectangle API</li>
+			<li>Extra</li>
+			<li class="sub1">Extending Objects</li>
+			<li class="sub1">Main API Methods</li>
+			<li class="sub1">Useful API Variables</li>
+			<li>Compatibility</li>
+		</ul>
+	</div><!--#sidebar-->
+	<div id="doc-content">
+		<div class="doc-spotlight">See <span class="libjs">Lib.js</span> in action, <a href="index.html">click to view demo animations</a> and live examples made using the <span class="libjs">Lib.js</span> API.</div><!--#doc-spotlight-->
+		<div class="doc-box-wrapper">
+			<div class="doc-box">
+				<p style="font-size:0.9em;color:rgb(173,205,210);">This documentation guides you step-by-step from the basics to complex usage of the <span class="libjs">Lib.js</span> API. If you would rather jump straight to animating, it is recommended you read <a href="#Accessing Objects">this section on accessing objects</a> first. You can then <a href="#Manipulating the Frames">find the advanced animation guide in this section</a>.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-title" id="Intro">Intro</div><!--.doc-box-title-->
+			<div class="doc-box">
+				<p><span class="libjs">Lib.js</span> requires the use of an HTML5 canvas element for animations. <a href="#Compatibility">Read more about it here.</a></p>
+				<p></p>
+				<p class="def2">Below are shown some steps that must be taken to ensure things go smoothly:</p>
+				<pre>
+				&lt;!--Link the library to your HTML document.--&gt;
+				&lt;head&gt;
+				  &lt;script src = "path/to/Lib.js"&gt;&lt;/script&gt;
+				  &lt;script&gt;
+				    window.onload = function() {
+				      //any of the code in this guide goes in here...
+				    }
+				  &lt;/script&gt;
+				&lt;/head&gt;
+				&lt;!--once that's done, make sure you place your code inside of a 'window.onload' function, or at the end of your document. This is essential as your canvas element must be loaded before it can beused by the library.--&gt;
+				</pre>
+				<p class="def2">Throughout this guide, we're going to assume that all code given will be wrapped inside of a <samp>window.onload</samp> function.</p>
+				<p></p>
+				<p>First thing's first. Before we begin animating anything, the canvas element must be created and set up to be used with the <samp>Lib()</samp> object. We do this by typing the code below:</p>
+				<pre>
+				var canvas_element = document.getElementById("my_canvas"); //get html canvas element
+				Lib().setCanvas(canvas_element);
+				</pre>
+				<p class="def">FYI: The <span class="libjs">Lib.js</span> folder comes with sample sprite images in the 'Graphics' folder for us to use throughout this guide.</p>
+				<p></p>
+				<p>That's all there's to it. We can now begin creating our objects and <samp>Lib()</samp> will place them in the canvas for us.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-title" id="Tutorials">Basic Tutorials</div><!--.doc-box-title-->
+			<div class="doc-box-subtitle" id="Basic API Structure">Basic API Structure</div><!--.subtitle-->
+			<div class="doc-box">
+				<pre>
+				Lib().sprite("PATH/TO/IMAGE",[128,128]);
+				</pre>
+				<p>Above is a sample sprite object that shows a very basic way to use the API to create a sprite animation.</p>
+				<p></p>
+				<p class="def">Sprite objects are objects that are individually animated using a sprite sheet. The sprite sheet contains different copies of an image, each with a distinct change, either side-by-side or top-to-bottom. Each of these image copies will be referred to as a "frame" and are shown one at a time in a certain order in order to emulate the animation of an object.</p>
+				<p></p>
+				<pre>
+				"PATH/TO/IMAGE" //This parameter specifies the location of a sprite image in your device.
+				[128,128]  //This array specifies the width and height of each "frame" in your sprite image
+				</pre>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Complex API Structure">Complex API Structure</div><!--.subtitle-->
+			<div class="doc-box">
+				<pre>
+				Lib().sprite({
+				  src:'PATH/TO/IMAGE',  //our image source
+				  size:[128,128],    //array that specifies [width,height] of each frame in our image
+				  position:[0,0],    //This method tells the library where to begin reading our image
+				  frequency:16,    //This method tells the library how fast to animate our image
+				  speed:70,    //This method is used in more complex animations.
+				        //Besides frequency, each object may also possess its own speed.
+				        //This is used when translating the object accross the canvas.
+				  x:'center',    //the x coordinate where each frame of our sprite will be placed
+				  y:200      //the y coordinate where each frame of our sprite will be placed
+				});
+				</pre>
+				<p>Above is a sample sprite object that shows a more flexible way of creating a sprite object.</p>
+				<p></p>
+				<p class="def">In the above example we passed all of the settings we wanted to apply to our object as a single argument in the form of a JSON object. This format should be familiar if you use or have used jQuery in previous projects.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-title" id="Creating Objects">Creating Objects</div><!--.doc-box-title-->
+			<div class="doc-box-subtitle" id="Setting the Canvas">Setting the Canvas</div><!--.subtitle-->
+			<div class="doc-box">
+				<pre>
+				Lib().setCanvas(canvas_element);
+				</pre>
+				<p>Above is an aforementioned example on how to set a canvas with Lib.js.</p>
+				<p></p>
+				<p class="def">When <samp>.setCanvas()</samp> is used, the canvas element is immediately assigned a tab-index; this means that when working with keyboard events later on, the element must be focused in order to catch these events. This also gives you more flexibility with your animations, as you can make an animation's runtime dependent on it.</p>
+				<p></p>
+				<p class="def">Lib.js supports multiple canvases. This may seem relevant in situations where you might need simultaneous animations in different parts of your document.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Sprite Objects">The Sprite Object</div><!--.subtitle-->
+			<div class="doc-box">
+				<p>Lib.js allows for the creation of two types of objects; Sprite and Non-sprite. We will create a Sprite object below:</p>
+				<pre>
+				Lib("sample_object").sprite("PATH/TO/SPRITE",[120,120]);
+				</pre>
+				<p class="def">We have just created a sprite object using short syntax. This method of creating an object takes individual parameters as settings rather than one parameter as a JSON object. Each possible parameter is explained below:</p>
+				<pre>
+				Lib("sample_object").sprite("PATH/TO/SPRITE",[120,120],16,[0,0],'horizontal',[0,1,2,3]);
+
+				"PATH/TO/SPRITE"  //the source to the image sprite.
+				[120,120]    //the size of each frame.
+				16      //How fast our sprite's frames will be cycled.
+				[0,0]      //The x and y coordinates we want our sprite to be in.
+				'horizontal'    //the direction we want our image to be read. 'horizontal' or 'vertical'
+				[0,1,2,3]    //the frames of our sprite we want to cycle through, and their order.
+				</pre>
+				<p>Let's take a look at a more flexible approach at creating the same object; this time, with more options:</p>
+				<pre>
+				Lib("sample_object").sprite({
+				  id:'sample_object',  //our object's id
+				  src:'PATH/TO/IMAGE',  //our image source*
+				  size:[128,128],    //our image size [width,height]*
+				  position:[0,0],    //the position to start reading our sprite image
+				  frequency:16,    //the speed at which to read the sprite image
+				  frames:[0,1,2,3,2,1]  //amount of frames to cycle through, and their order.
+				  speed:70,    //the speed of our object (at which it'll move accross x and y)
+				  reverse:true,    //reverses the current frame order
+				  x:'center',    //x coordinate of the object; takes 'center', 'top', 'right',
+				        //'left', 'bottom' or a number for values
+				  y:200      //y coordinate of the object; takes 'center', 'top', 'right',
+				        //'left', 'bottom' or a number for values
+				});
+				* required values
+				</pre>
+				<p>Each object's sprite image will be individually loaded, making each sprite object available to be interacted with at differing times. This will be discussed further in the next section.</p>
+			</div><!--.doc-box-->		
+			<div class="doc-box-subtitle" id="Image Objects">The Image Object</div><!--.subtitle-->
+			<div class="doc-box">
+				<p>An image object is pretty much a sprite object with a single frame. Therefore, the syntax for both may appear similar. Below is a basic form of the API for creating a static image object:</p>
+				<pre>
+				Lib("static_image").image("PATH/TO/IMAGE",100,200);  //args: source, x-pos, y-pos
+				</pre>
+				<p class="def">Since the library doesn't have to worry about animating our image, its syntax becomes much simpler, there are however options to customize it further:</p>
+				<pre>
+				Lib("static_image").image({
+				  src:"PATH/TO/IMAGE",  //our image source
+				  size:[100,200],    //the size of our image [width,height].
+				  speed:200,    //how fast our image is translated accross the canvas
+				  position:[0,0],    //used to display a specific region of our image
+				  x:100,      //image's x pos. 'left' 'right' 'bottom' 'center' or a number
+				  y:'bottom'    //image's y pos. 'left' 'right' 'bottom' 'center' or a number
+				});
+				</pre>
+				<p class="def">The image's width and height are automatically calculated. Although the image size array is not needed because of this, we may still use it if we wish to shrink or enlarge our image object.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Accessing Objects">Accessing Created Objects</div><!--.subtitle-->
+			<div class="doc-box">
+				<p style="font-size:0.9em;color:rgb(173,205,210);">Due to its focus on simple animation, Lib.js handles image loading in real-time (no preloading); this means that to interact with a sprite object after it's been created, you must do so inside of a <samp>.load()</samp> event. This will be discussed further in this section.</p>
+				<p></p>
+				<p>Notice how in the last section, we added a parameter to the main function like so:</p>
+				<pre>
+				Lib("sample_object") //once loaded, this will return the sprite object from above
+				</pre>
+				<p class="def">By adding this parameter, we are assigning an id of <b>sample_object</b> to our object. This is very important as whatever name we decide to give our object is going to be how we reference it in the future.</p>
+				<p></p>
+				<p>Now that we know how to assign an id to objects, lets see how referencing these objects is done:</p>
+				<pre>
+				Lib("sample_object").load(function() {
+				  //this code will be executed once this object has finished loading
+				});
+				</pre>
+				<p class="def">One way to interact with existing objects is by placing code inside of a <samp>.load()</samp> callback function for that object.</p>
+				<p></p>
+				<p class="def">A more effective way of interacting an object, specially when there is more than one is to attach a <samp>.load()</samp> callback functon to the main <samp>Lib()</samp> object, like so:</p>
+				<pre>
+				Lib().load(function() {
+				  //code here will execute when every sprite object in the canvas has been loaded.
+				});
+				</pre>
+				<p>By using the latter method, we can call and interact with any object in the canvas, without the need to attach individual <samp>.load()</samp> methods to each object.</p>
+				<pre>
+				Lib().load(function() {
+				  Lib("sample_object").getX(); //returns the x coordinate value for this object
+				});
+				</pre>
+				<p class="def">The reason why this must be done in order to access our objects is because their images must be loaded before they can be placed in the canvas. Once the loading is done, we can call each object how you would expect them to be called.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-title" id="Drawing Shapes">Drawing Shape Objects</div><!--.doc-box-title-->
+			<div class="doc-box-subtitle" id="Lines">Lines</div><!--.subtitle-->
+			<div class="doc-box">
+				<p>Aside from creating sprites and static images, <span class="libjs">Lib.js</span> allows us to draw basic canvas elements as well. Below is the basic syntax for drawing a line:</p>
+				<pre>
+				Lib("sample_line").line(0,0,200,100,"red");
+
+				0  //first arg: starting x position
+				0  //second arg: starting y position
+				200  //ending x position
+				100  //ending y position
+				"red"  //color of line
+				</pre>
+				<p>To have a few more options, there is always the more flexible syntax:</p>
+				<pre>
+				Lib("sample_line").line({
+				  x:0,      //starting x position
+				  y:0,      //starting y position
+				  toX:200,    //ending x position
+				  toY:100,    //ending y position
+				  color:'green',    //color of line
+				  width:3,    //width or thickness of our line
+				  speed:16    //the speed of our object when translated accross canvas
+				});
+				</pre>
+				<p class="def">Much like our <samp>.line()</samp> method, our methods for drawing rectangles and ellipses an equal amount of arguments, and both possess a short-form and flexible syntax.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Rectangles">Rectangles</div><!--.subtitle-->
+			<div class="doc-box">
+				<p>The syntax for basic shapes is very consistent for each shape with minor differences shown in the examples:</p>
+				<pre>
+				Lib("sample_rectangle").rect({
+				  x:0,      //starting x position
+				  y:0,      //starting y position
+				  size:[250,100],    //the size of our object [width,height]
+				  fillColor:'red',  //color to fill rectangle (false for no color)
+				  color:'green',    //color of the rectangle's border (false for no color)
+				  width:3,    //width or thickness of our border
+				  speed:16    //the speed of our object when translated accross canvas
+				});
+				</pre>
+				<p class="def">Much like our <samp>.line()</samp> method, our methods for drawing rectangles and ellipses an equal amount of arguments, and both possess a short-form and flexible syntax.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Ellipses">Ellipses</div><!--.subtitle-->
+			<div class="doc-box">
+				<p>Ellipses are somwhat complex, and can be turned into arcs by tweaking the syntax a little.</p>
+				<p></p>
+				<p class="def">This feature is a work in progress and will be added to the API shortly.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-title" id="Animation">Animation</div><!--.doc-box-title-->
+			<div class="doc-box">
+				<p>To begin, let's start by going over the two most important methods of controlling a sprite object's animation.</p>
+				<p class="def">Let's assume we are still working with our <b>sample_object</b> from earlier on.
+				<pre>
+				Lib("sample_object").stopAnimation(); //stops animating that individual object's sprite
+				</pre>
+				<p><samp>.stopAnimation()</samp> is a method available at both the sprite-object level, and the global API level.</p>
+				<p></p>
+				<p class="def">As we have seen in the example above, calling this method on a particular object, will cause only that object to freeze its sprite animation. Note that this method does not freeze that object to its x and y coordinates, it simply stops animating its sprite. The object can still be translated accross the canvas.</p>
+				<p class="def"></p>
+				<p></p>
+				<p>To call <samp>.stopAnimation()</samp> at the global level, simply follow the example below:</p>
+				<pre>
+				Lib().stopAnimation(); //stops animating every sprite on the canvas
+				</pre>
+				<p>By not specifying an object's id, we call the main Lib object and tell it to stop animating every sprite currently on the canvas.</p>
+				<p></p>
+				<p class="def">This is useful specially for situations where you have only one sprite object being animated while having the rest remaining static. Combinging these animation methods with input rules will allow for more precise animation, specially in games, and will be discussed in the next chapter of this guide.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Manipulating Frames">Manipulating Frames</div><!--.subtitle-->
+			<div class="doc-box">
+				<p><span class="libjs">Lib.js</span> allows us to have complete control of a sprite object. This involves, of course, setting the amount of frames you wish to render, the order of these frames, and their size.</p>
+				<p></p>
+				<p class="def">Each object has methods for getting and changing their x and y coordinates at any given moment (after they have been loaded into the canvas), as well as methods for altering sprite animation settings, provided the object is a sprite object. The methods each object contains are <a href="#APIs">given and explained here</a>.</p>
+				<p></p>
+				<p class="def">The <span class="libjs">Lib.js</span> folder comes with several sample images for us to use. Refer to the 'Graphics' folder for these.</p>
+				<p></p>
+				<p>In the examples below, we create a loading animation sprite that will play frames at differing combinations.</p>
+				<pre>
+				Lib("loader").sprite("graphics/loader.png",[128,128]);
+				//because we only entered the two required parameters, every other setting will be set
+				//to its default value. The number of possible frames will be automatically calculated.
+				//all available frames for this object will be rendered, and they will cycle from left to right.
+
+				Lib("loader").sprite({
+				  src:'graphics/loader.png',  //required value
+				  size:[128,128],      //required value
+				  direction:'vertical'    //default is 'horizontal'
+				});
+				//this object will be rendered exactly as the last one, except its sprite image will be read vertically, and its frames will cycle from top to bottom. This is not very effective with the particular sprite image we're currently using, as it is drawn to be read from left to right.
+				</pre>
+				<p class="def">Now that we have learned about the purpose of the <b>direction</b> property, let's try controlling the frames themselves:</p>
+				<pre>
+				Lib("loader").sprite({
+				  src:'graphics/loader.png',
+				  size:[128,128],    //notice the size entered is the width and height of each frame,
+				        //and not of the entire sprite image. (pixels).
+				  frames:[0,1,2,3,4],  //takes an array of integers. We don't want its highest number
+				        //to exceed the total amount of frames our sprite image has.
+				  frequency:20,    //default value is 16. Frequency is how fast the library will
+				        //cycle through our frames.
+				  position:[0,0]    //the location (in our sprite image) in which the library will
+				        //begin reading the frames.
+				});
+				//the object above will animate just fine at a frequency of 1.3 times the default value. Instead of cycling through all of its frames, the object will cycle up to the fifth frame (starting with the frame located at 0 pixels in the x direction of the sprite image).
+
+				//Once the fifth frame is cycled through, the animation will be reset to the first frame.
+				</pre>
+				<p class="def">To find out the amount of frames your sprite image has, simply count the number of images drawn on it from left-to-right, or top-to-bottom depending on the image.</p>
+				<pre>
+				Lib("loader").sprite({
+				  size:[128,128],
+				  frames:[0,1,2,3,4,3,2,1],
+				  frequency:15,  //notice the frequency has been changed, making this animation slower
+				  position:[0,0],
+				  reverse:true  //will cause frames to cycle in reverse
+				});
+				//Aside from changing its frequency, we also changed the object's frame order. This time, it will cycle to frame four, and cycle down to the first frame available. Since the 'reverse' is set to <samp>true</samp>, our animation will cycle through the frames backwards.
+				</pre>
+				<p class="def2">Here is what our <b>loader</b> object looks like when animated with default settings. (If you see nothing below, try upgrading your browser).</p>
+				<div id="demo1" class="doc-box-demo">
+					<p class="demo">Click to show / hide demo.</p>
+					<canvas width="800">
+						<pre>
+							//Your browser does not support HTML5, try upgrading to a newer one!
+						</pre>
+					</canvas>
+				</div><!--.doc-box-demo-->
+				<p class="def">Click on the space above to start the demo. The sample above is using a basic sprite function with all of the default settings. The only arguments provided were the image's source and size array.</p>
+				<p></p>
+				<p class="def">If you'd like to see more demos, <a href="index.html">visit the demos page</a>; it comes with step-by-step guides and will be expanded as more features are added.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Translating Objects">Translating Objects</div><!--.subtitle-->
+			<div class="doc-box">
+				<p>By translating an object, we are simply moving it accross the canvas. Here is where the <b>speed</b> property of each object comes into play.</p>
+				<p></p>
+				<p>To begin, simply create any type of object from the ones we have discussed throughout this guide, then, we'll use the object API in order to integrate its movement with the current frame rate of the animation.</p>
+				<p></p>
+				<p class="def2">You can read more about each object's API <a href="APIs">in this section of the guide</a>.</p>
+				<p></p>
+				<p>Below, we create our object and translate it accross the canvas from scratch:</p>
+				<pre>
+				var canvas = document.getElementById("canvas_id"); //we're starting from scratch
+
+				Lib().setCanvas(canvas); //can't forget the canvas
+				Lib("my_object").sprite("my_image.png",[100,100]); //Here we create the object and name it "my_object"
+
+				//now we tell Lib.js to execute the rest of our code once all of our objects are loaded. This allows us to be able to call any object without any issues
+				Lib().load(function() {
+				  Lib("my_object").increaseX();  //here we use the .increaseX() API method in order to
+				          //move the object to the right indefinitely
+				});
+				</pre>
+				<p class="def">The demo above demonstrated how to use the <samp>.increaseX()</samp> method in order to translate an object to the right. Each of the API methods will be discussed further later on in this guide.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Rotating Objects">Rotating Objects</div><!--.subtitle-->
+			<div class="doc-box">
+				<p class="def2">This feature is still a work in progress and will be implemented into <span class="libjs">Lib.js</span> soon.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-title" id="Input">Input</div><!--.subtitle-->
+			<div class="doc-box">
+				<p>Although it will be explained more in-depth later on, it's only appropriate we discuss the <samp>.click()</samp> method before we fully dive into this section.</p>
+				<p></p>
+				<p class="def">The <samp>.click()</samp> API method simply adds a 'click' listener to objects in the canvas. By using this method, you can further expand your animation and interaction with canvas objects.</p>
+				<p></p>
+				<p>The example below shows how to use the click method to hide an object from the canvas:</p>
+				<p class="def2">This example assumes we are using the already-created object from the previous example.</p>
+				<pre>
+				Lib().load(function() {
+				  Lib("my_object").click(function() {
+				    //when the object is clicked, the following code will be executed
+				    this.hide();
+				  });
+				});
+				</pre>
+				<p class="def">The example above demonstrates how to use the <samp>.click()</samp> method to allow adding event listeners to canvas objects. We will be shown how to listen for keyboard events in the next section, further expanding our ability to control our objects.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Adding Input Rules">Adding Input Rules</div><!--.subtitle-->
+			<div class="doc-box">
+				<p>Input rules are a simple way of centralizing keyboard event actions. They allow easy integration of keyboard event handling with the frame rate of an animation, and flexibility with object manipulation.</p>
+				<p></p>
+				<p class="def">Input rules are added directly to the <samp>Lib()</samp> object and are applied to any of the objects selected. Below is an example of an input rule callback function added to the main object:</p>
+				<pre>
+				Lib().addInputRule(function() {
+				  //The Input API is placed here to be executed alongside the rest of the animation
+				});
+				</pre>
+				<p class="def">The object input API will be discussed in detail in the next section. Its methods MUST be placed inside of an <samp>.addInputRule()</samp> callback function as shown above in order to be executed. This not only helps keep code organized, for efficiency, but also allows flexibility when catching keyboard inputs.</p>
+				<p></p>
+				<p class="def">Below we see another example demonstrating the use of the <samp>.addInputRule()</samp> method, as well as showcasing some of the object input API:</p>
+				<pre>
+				Lib("my_object").sprite("image.png",[120,120]); //creating the object
+				//telling Lib to execute the following code after all objects have been loaded
+				Lib().load(function() {
+				  Lib().addInputRule(function() {
+				    var object = Lib("my_object"); //for simplicity, we'll assign our object to a var
+				    //.hasInputKey() only takes key codes as input for now
+				    if(Lib().hasInputKey(37)) {
+				      object.decreaseX();
+				    }  
+				  });
+				});
+				</pre>
+				<p class="def">In the example above, we add a <samp>.addInputRule()</samp> block and assign <b>my_object</b> to a variable. We then use <samp>.hasInputKey()</samp> to move our object to the left (decreasing y direction) if <samp>Lib</samp> detects the left arrow key pressed (key code of 37).</p>
+				<p></p>
+				<p class="def">Please note that the <samp>.addInputRule()</samp> method <b>must</b> be placed inside of a <samp>.load()</samp> callback method, as shown in the example above.</p>
+				<p></p>
+				<p class="def2">Please note that you can add as many input rules as needed. The demos page contains an example demonstrating the example above further. <a href="index.html">You can visit the demos page here</a>.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Input API">Input API</div><!--.subtitle-->
+			<div class="doc-box">
+				<p class="def2">All but one of these methods are attached only to the main <samp>Lib()</samp> object:</p>
+				<ul>
+					<li><samp>.addInputRule()</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>This method, as shown in previous examples, allows you to add <b>keyboard</b> input rules to the canvas. Any code placed inside of this method will be integrated with your animation's frame rate, and executed accordingly. <a href="#Adding Input Rules">See an example right here</a>.</p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>Must be placed inside of a <samp>.load()</samp> callback method. Refer to example for details.</p>
+					</li>
+					<li><samp>.click()</samp></li>
+					<li class="des">
+						<p>This method <b>does not</b> require to be placed inside of an <samp>.addInputRule()</samp> method. It adds a <b>click</B> event listener to any canvas object. <a href="#Input">See a usage example here.</a></p>
+					</li>
+					<li class="req">
+						<p>Can only be attached to canvas objects, not the main <samp>Lib()</samp> object.</p>
+					</li>
+					<li><samp>.hasInput()</samp></li>
+					<li class="des">
+						<p>This method requires the use of an <samp>.addInputRule()</samp> method. It returns <b>true</b> if there are any keyboard keys being pressed, or <b>false</b> if there are no keys being currently pressed.</p>
+					</li>
+					<li class="req">
+						<p>Must be placed inside of an <samp>.addInputRule()</samp> callback method. <a href="#Adding Input Rules">Refer to this example</a>.</p>
+					</li>
+					<li><samp>.hasInputKey()</samp></li>
+					<li class="des">
+						<p>This method requires the use of an <samp>.addInputRule()</samp> method. It takes a keyboard <b>keycode</b> as a parameter and returns <b>true</b> when that key is pressed, and <b>false</b> when it's not.</p>
+					</li>
+					<li class="req">
+						<p>Requires the use of an <samp>.addInputRule()</samp> callback method. See <a href="#Adding Input Rules">this example for details</a>.</p>
+					</li>
+				</ul>
+			</div><!--.doc-box-->
+			<div class="doc-box-title" id="APIs">Object APIs</div><!--.subtitle-->
+			<div class="doc-box-subtitle" id="Shared Methods">Shared Methods</div><!--.subtitle-->
+			<div class="doc-box">
+				<p class="def2">The following is a list of methods that can be attached to any type of created object:</p>
+				<ul>
+					<li><samp>.click()</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>This method adds a <b>click</b> event listener to any canvas object. <a href="#Input">See a usage example here.</a></p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>Can only be attached to canvas objects, not the main <samp>Lib()</samp> object.</p>
+					</li>
+					<li><samp>.decreaseX()</samp></li>
+					<li class="des">
+						<p>Calculates the amount of pixels to move an object based on its current speed and the animation's current frame rate. It then moves the object in the negative x direction by that amount. Takes one optional <b>parameter</b> to alter the calculated amount.</p>
+					</li>
+					<li class="req">
+						<p>Takes one (optional) integer parameter. This is multiplied by the current speed for that particular instance.</p>
+					</li>
+					<li><samp>.decreaseY()</samp></li>
+					<li class="des">
+						<p>Calculates the amount of pixels to move an object based on its current speed and the animation's current frame rate. It then moves the object in the negative y direction by that amount. Takes one optional <b>parameter</b> to alter the calculated amount.</p>
+					</li>
+					<li class="req">
+						<p>Takes one (optional) integer parameter. This is multiplied by the current speed for that particular instance.</p>
+					</li>
+					<li><samp>.extend()</samp></li>
+					<li class="des">
+						<p>Allows you to attach methods of your own to a particular object. Note only that object will possess these new methods. Takes <b>two required parameters</b>, the first one being the name of your new method as a <b>string</b>, and the second being the function, or method, you wish to attach to that particular object.</p>
+					</li>
+					<li class="req">
+						<p>See an example of <a href="#Extending Objects">its usage right here</a>.</p>
+					</li>
+					<li><samp>.extendType()</samp></li>
+					<li class="des">
+						<p>Allows you to attach methods of your own to every object of that particular object's type (e.g. If attached to a line object, all line objects will be extended with that new method). Takes <b>two required parameters</b>, the first one being the name of your new method as a <b>string</b>, and the second being the function, or method, you wish to attach to that entire object type.</p>
+					</li>
+					<li class="req">
+						<p>Takes two <b>required parameters</b>. This method, along with any others in this section cannot be attached to the main <samp>Lib()</samp> object.</p>
+					</li>
+					<li><samp>.getLineWidth()</samp></li>
+					<li class="des">
+						<p>Returns an integer value with the current line width. If the object type is a sprite, the value returned will be zero.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.getHeight()</samp></li>
+					<li class="des">
+						<p>Returns an integer value with the current height of the object. If the object type is a line, the equivalent method for lines, <samp>.getLength()</samp>, will be called.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.getWidth()</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>Returns the width of the object. If the object is a line, it will return the current line width.</p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.getX()</samp></li>
+					<li class="des">
+						<p>Returns an integer value with the current x position of the object.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.getY()</samp></li>
+					<li class="des">
+						<p>Returns an integer value with the current y position of the object.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.hide()</samp></li>
+					<li class="des">
+						<p>Stops rendering the object, while saving all of its data. The object can be re-rendered with all of its data intact by using the <samp>.show()</samp> method.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.increaseX()</samp></li>
+					<li class="des">
+						<p>Calculates the amount of pixels to move an object based on its current speed and the animation's current frame rate. It then moves the object in the positive x direction by that amount. Takes one optional <b>parameter</b> to alter the calculated amount.</p>
+					</li>
+					<li class="req">
+						<p>Takes one (optional) integer parameter. This is multiplied by the current speed for that particular instance.</p>
+					</li>
+					<li><samp>.increaseY()</samp></li>
+					<li class="des">
+						<p>Calculates the amount of pixels to move an object based on its current speed and the animation's current frame rate. It then moves the object in the positive y direction by that amount. Takes one optional <b>parameter</b> to alter the calculated amount.</p>
+					</li>
+					<li class="req">
+						<p>Takes one (optional) integer parameter. This is multiplied by the current speed for that particular instance.</p>
+					</li>
+					<li><samp>.load()</samp></li>
+					<li class="des">
+						<p>Takes a callback function as a <b>parameter</b> and then executes it as soon as the object has loaded and is ready to be rendered on the canvas.</p>
+					</li>
+					<li class="req">
+						<p>This method only applies to created objects, not to be confused with the global <samp>.load()</samp> method which is attached to the main <samp>Lib()</samp> object and will be discussed later.</p>
+					</li>
+					<li><samp>.remove()</samp></li>
+					<li class="des">
+						<p>This feature is currently a work in progress and will be implemented soon.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.show()</samp></li>
+					<li class="des">
+						<p>Begins re-rendering the object, while restoring all of its data. The object starts rendering where it left off when its <samp>.hide()</samp> method was called.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.setSpeed()</samp></li>
+					<li class="des">
+						<p>Takes one <b>parameter</b> of integer value and changes the current speed for that object to the parameter value.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.setWidth()</samp></li>
+					<li class="des">
+						<p>Requires one <b>parameter</b> of integer value and changes the current width for that object to the parameter value. If the object is a line, the line's width will be changed to the new value. If the object is a sprite or a static image, the frame width will be changed to the new value.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.setX()</samp></li>
+					<li class="des">
+						<p>Takes one <b>parameter</b> of integer value and sets the current x position of that object to the parameter value.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.setY()</samp></li>
+					<li class="des">
+						<p>Takes one <b>parameter</b> of integer value and sets the current y position of that object to the parameter value.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.toggleHide()</samp></li>
+					<li class="des">
+						<p>An extension of the <samp>.show()</samp> and <samp>.hide()</samp> methods. Starts re-rendering an object if it is hidden, or stops rendering it if it's visible.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+				</ul>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Sprite API">Sprite Object Methods</div><!--.subtitle-->
+			<div class="doc-box">
+				<p class="def2">These methods are only available in sprite-type and static image-type objects.</p>
+				<ul>
+					<li><samp>.freeze()</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>This feature is a work in progress and will be implemented soon.</p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.getSpriteWidth()</samp></li>
+					<li class="des">
+						<p>This method returns the width of the entire sprite image. If the object is a static image, it will simply return the width of the object.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.resumeAnimation()</samp></li>
+					<li class="des">
+						<p>Resumes cycling through the sprite to continue that object's animation.</p>
+					</li>
+					<li class="req">
+						<p>Used to undo the effects of the <samp>.stopAnimation()</samp> method.</p>
+					</li>
+					<li><samp>.reverseAnimation()</samp></li>
+					<li class="des">
+						<p>Takes one <b>required parameter</b>. If the parameter passed is <b>true</b>, the object's sprite frames will be cycled in a reverse order. If the parameter passed is <b>false</b>, the object's sprite frames will be cycled in a forward manner.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.setFrames()</samp></li>
+					<li class="des">
+						<p>Requires one <b>parameter</b> of an array of integers. This array represents each frame in the sprite image, and the order in which each frame will be cycled through.</p>
+					</li>
+					<li class="req">
+						<p>An example parameter for this method is <samp>[0,1,2,3]</samp>. For optimal results, make sure the array length does not exceed the number of actual frames on your sprite image.</p>
+					</li>
+					<li><samp>.setFrequency()</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>Requires <b>one integer parameter</b>. Updates the current speed at which the animation cycles through that particular object's sprite image frames.</p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.setSpriteX()</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>Requires <b>one integer parameter</b>. This method changes the current x position on the sprite image.</p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>The sprite position represents the x and y coordinates at which the animation will read the first frame of your sprite image.</p>
+					</li>
+					<li><samp>.setSpriteY()</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>Requires <b>one integer parameter</b>. This method changes the current y position on the sprite image.</p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>The sprite position represents the x and y coordinates at which the animation will read the first frame of your sprite image.</p>
+					</li>
+					<li><samp>.stopAnimation()</samp></li>
+					<li class="des">
+						<p>Stops cycling through that object's sprite. The frames are reset, and the object's animation becomes frozen on the first frame.</p>
+					</li>
+					<li class="req">
+						<p>To resume an object's animation, simply use the <samp>.resumeAnimation()</samp> method.</p>
+					</li>
+					<li><samp>.unfreeze()</samp></li>
+					<li class="des">
+						<p>This feature is a work in progress and will be implemented soon.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+				</ul>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Line API">Line Object Methods</div><!--.subtitle-->
+			<div class="doc-box">
+				<p class="def2">These methods are only available in line-type objects.</p>
+				<ul>
+					<li><samp>.getLength()</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>This method returns the current length of the drawn line object.</p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>There is no additional information for this method.</p>
+					</li>
+				</ul>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Rectangle API">Rectangle Object Methods</div><!--.subtitle-->
+			<div class="doc-box">
+				<p class="def2">These methods are only available in rectangle-type objects.</p>
+				<ul>
+					<li><samp>.getFillColor()</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>This method returns a string value with the current fill color of the object. If no fill color has been set, it returns false.</p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.setFillColor()</samp></li>
+					<li class="des">
+						<p>Requires one <b>string parameter</b>. Updates the current object's <b>fillColor</b> attribute.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+				</ul>
+			</div><!--.doc-box-->
+			<div class="doc-box-title" id="Extra">Extra</div><!--.subtitle-->
+			<div class="doc-box">
+				<p class="def2">This section of the API includes a guide that allow the customization and attachment of new methods. Please note that you may overwrite existing methods involuntarily; please be sure to check the library's APIs before deciding on a new method's name.</p>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Extending Objects">Extending Objects</div><!--.subtitle-->
+			<div class="doc-box">
+				<p>This part of the API allows you to add your own methods to certain objects, and entire object types.</p>
+				<p></p>
+				<p class="def">To begin extending objects, we will go over the <samp>.extend()</samp> method.</p>
+				<pre>
+				Lib("my_object").extend('getName',function() {
+				  return this.id;
+				});
+				</pre>
+				<p class="def">With the example above, we have extended our object by adding the <samp>.getName()</samp> method to it. This means we can now use that method with our object anytime.</p>
+				<pre>
+				Lib("my_object").getName(); //returns the object's id (returns String "my_object")
+				</pre>
+				<p class="def">The <samp>.extend()</samp> method can only be called once our object is available; therefore, if the object is a sprite or a static image, we must nest the <samp>.extend()</samp> method in a <samp>.load</samp> method.</p>
+				<pre>
+				Lib().load(function() {
+				  Lib("my_object").extend('getName',function() {
+				    return this.id;
+				  });
+				});
+				//alternatively, we could use the single-object load method to achieve the same result (if you have no other objects in your canvas you'd like to interact with)
+				Lib("my_object").load(function() {
+				  this.extend('getName',function() {
+				    return this.id;
+				  });
+				  this.getName(); //returns this object's id
+				});
+				</pre>
+				<p>To extend an entire object type (all of the objects in the canvas currently of the same type), simply use the <samp>.extendType()</samp> method.</p>
+				<pre>
+				Lib("my_object").extendType('getName',function() {
+				  return this.id;
+				});
+				//all of the objects of the same type as "my_object" will now have the method 'getName' attached to them
+				</pre>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Main API Methods">Main API Methods</div><!--.subtitle-->
+			<div class="doc-box">
+				<p class="def2">This section contains methods that can only be attached to the main <samp>Lib()</samp> object.</p>
+				<ul>
+					<li><samp>.addInputRule()</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>Although discussed before, this method requires a parameter in the form of a <b>callback function</b>. Anything within that callback function will get integrated with the rest of the animation at the current frame rate. You can add as many input rules as you need. <a href="#Input API">Read more about input methods here.</a></p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>Any input rules must be placed within this function in order to be executed. This allows the library to integrate any object movement with the current frame rate.</p>
+					</li>
+					<li><samp>.ellipse()</samp></li>
+					<li class="des">
+						<p>This feature is a work in progress and will be implemented soon. <a href="#Ellipses">Guide coming soon</a>.</p>
+					</li>
+					<li class="req">
+						<p>This method takes multiple parameters.</p>
+					</li>
+					<li><samp>.getObject()</samp></li>
+					<li class="des">
+						<p>Requires one <b>string parameter</b> and returns the object with that ID.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.getObjects()</samp></li>
+					<li class="des">
+						<p>Requires no parameters. Returns an array of all of the objects currently in the canvas.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.hasInput()</samp></li>
+					<li class="des">
+						<p>Returns <b>true</b> if there are currently any keyboard keys being pressed. <a href="#Input API">This method is further discussed here</a>.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.hasInputKey()</samp></li>
+					<li class="des">
+						<p>Requires one <b>integer parameter</b> representing a key code, and returns <b>true</b> when that key is pressed, and <b>false</b> otherwise.</p>
+					</li>
+					<li class="req">
+						<p><a href="Input API">Input methods are further discussed here</a>.</p>
+					</li>
+					<li><samp>.image()</samp></li>
+					<li class="des">
+						<p>Creates a <b>static image object</b> and places it on the canvas. This object assumes the image resource provided is not a sprite and therefore treats the animation as a single static frame. <a href="#Image Objects">See usage guide here</a>.</p>
+					</li>
+					<li class="req">
+						<p>This method takes multiple parameters, and requires at least two. Refer to the example for details.</p>
+					</li>
+					<li><samp>.line()</samp></li>
+					<li class="des">
+						<p>Creates a <b>line</b> object and places it on the canvas. <a href="#Lines">See usage guide here</a>.</p>
+					</li>
+					<li class="req">
+						<p>This method takes multiple parameters. Refer to the example for details.</p>
+					</li>
+					<li><samp>.load()</samp></li>
+					<li class="des">
+						<p>Requires one <b>parameter</b> in the form of a callback function. Anything inside its callback function will be executed once every object has been loaded and added to the canvas. This method is required in order to interact with sprite and static-image objects.</p>
+					</li>
+					<li class="req">
+						<p>Examples on how to use this method can be found throughout this guide, <a href="#Accessing Objects">particularly here</a>.</p>
+					</li>
+					<li><samp>.logfps()</samp></li>
+					<li class="des">
+						<p>Debugging method. Logs the current frame rate to the browser's console.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.pause()</samp></li>
+					<li class="des">
+						<p>Pauses or freezes the entire animation.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+					<li><samp>.rect()</samp></li>
+					<li class="des">
+						<p>Creates a <b>rectangle</b> object and places it on the canvas. <a href="#Rectangles">See usage guide here</a>.</p>
+					</li>
+					<li class="req">
+						<p>This method takes multiple parameters. Refer to the example for details.</p>
+					</li>
+					<li><samp>.reset()</samp></li>
+					<li class="des">
+						<p>Erases all objects from the canvas and resets all current settings.</p>
+					</li>
+					<li class="req">
+						<p>The canvas must be set again once this method is used.</p>
+					</li>
+					<li><samp>.resume()</samp></li>
+					<li class="des">
+						<p>Unpauses or unfreezes the animation.</p>
+					</li>
+					<li class="req">
+						<p>Undos the actions done by the <samo>.pause()</samo> method.</p>
+					</li>
+					<li><samp>.resumeAnimation()</samp></li>
+					<li class="des">
+						<p>This method resumes cycling through the frames of all sprite images. Unfreezes the animations of all individual sprite objects.</p>
+						<p><b>Optionally</b> takes as a parameter a canvas element. If no parameter is passed, the most recently assigned canvas element will be the one affected.</p>
+					</li>
+					<li class="req">
+						<p>This method differs from the <samp>.resume()</samp> method, as the <samp>.resume()</samp> method freezes the entire animation. This one only freezes the sprite animations of all sprite objects.</p>
+					</li>
+					<li><samp>.sprite()</samp></li>
+					<li class="des">
+						<p>Creates a <b>sprite</b> object and places it on the canvas. These objects require a sprite image as a resource, and will be animated by cycling through each of the sprite image's frames. <a href="#Sprite Objects">See usage guide here</a>.</p>
+					</li>
+					<li class="req">
+						<p>This method takes multiple parameters, and requires at least two. Refer to the example for details.</p>
+					</li>
+					<li><samp>.stopAnimation()</samp></li>
+					<li class="des">
+						<p>Stops animating every sprite object in the canvas. Objects can still be translated accross the canvas.</p>
+						<p><b>Optionally</b> takes as a parameter a canvas element. If no parameter is passed, the most recently assigned canvas element will be the one affected.</p>
+					</li>
+					<li class="req">
+						<p>This method is best used inside of an <samp>.addInputRule()</samp> method.</p>
+					</li>
+					<li><samp>.setCanvas()</samp></li>
+					<li class="des">
+						<p>This method assigns an HTML5 <b>canvas</b> element to the library. Any methods and objects created after this one will use the canvas element passed as a parameter. You can use more than one canvas with the library. <a href="#Intro">See an example on usage right here</a>.</p>
+					</li>
+					<li class="req">
+						<p>Requires one parameter of type <samp>[Object object]</samp> or a string with the element ID of your canvas element.</p>
+					</li>
+					<li><samp>.useSingleCanvasMode()</samp></li>
+					<li class="des">
+						<p>Debugging method. This method forces the library to use one canvas, even if more than one has been assigned.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this method.</p>
+					</li>
+				</ul>
+			</div><!--.doc-box-->
+			<div class="doc-box-subtitle" id="Useful API Variables">Useful API Variables</div><!--.subtitle-->
+			<div class="doc-box">
+				<p class="def2">Below is a list of useful API variables that you may use when extending objects.</p>
+				<ul>
+					<li><samp>Lib().canvas</samp></li>
+					<li class="des" style="border-top:0;">
+						<p>Returns the most recently-assigned canvas element, or the only canvas (if only one is being used) that has been assigned to the library.</p>
+					</li>
+					<li class="req" style="border-top:0;">
+						<p>The return value for this variable is of type <samp>[Object object]</samp>.</p>
+					</li>
+					<li><samp>Lib().ctx</samp></li>
+					<li class="des">
+						<p>Returns the 2D context of the most reently-assigned canvas element.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this variable.</p>
+					</li>
+					<li><samp>Lib().loaded</samp></li>
+					<li class="des">
+						<p>Returns <b>true</b> if all objects have been loaded and placed on the canvas, or <b>false</b> if there is at least one object still loading.</p>
+					</li>
+					<li class="req">
+						<p>There is no additional information for this variable.</p>
+					</li>
+				</ul>
+				<p style="height:30px;width:100%;clear:both;"></p>
+				<p class="def2">Please note that while you can use the <samp>Lib().ctx</samp> property to manually draw on the canvas, anything drawn with this property will <b>not</b> be integrated into the animation, and will not be treated as a library object.</p>
+			</div><!--.doc-box-->
+			<p style="width:800px;text-align:center;float:left;font:italic 1.3em 'Molle';min-height:10px;padding:0;margin:70px 0 30px 0;">Thanks For Reading!</p>
+			<div class="doc-box">
+				<ul id="Compatibility">
+					<li data-label="Google Chrome" class="icon"></li>
+					<li data-label="Firefox 2+" class="icon"></li>
+					<li data-label="Safari 3+" class="icon"></li>
+					<li data-label="Internet Explorer 9+" class="icon"></li>
+				</ul>
+			</div><!--.doc-box-->
+			<p class="def2" style="float:left;font-size:0.9em;text-align:center;width:800px;color:rgb(124,128,128);"><span class="nodejs">Lib.js</span> is compatible with recent versions of all major browsers, as well as any browser that supports HTML5.</p>
+			<div class="doc-box">
+				<div id="footer">Thank you for your support. With your help, <span class="libjs">Lib.js</span> will continue to grow and become even better. Send a bug report, feature request,  <a href="mailto:juuanv@gmail.com">or other feedback here.</a></div><!--#footer-->
+			</div><!--.doc-box-->
+		</div><!--.doc-box-wrapper-->
+	</div><!--#doc-content-->
+</div><!--#wrapper-->
+</body>
+</html>

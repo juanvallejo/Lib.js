@@ -1,0 +1,250 @@
+@import url(http://fonts.googleapis.com/css?family=Source+Code+Pro);
+@import url(http://fonts.googleapis.com/css?family=Marcellus);
+@import url(http://fonts.googleapis.com/css?family=Molle:400italic);
+
+a {
+text-decoration:none; color:inherit;
+}
+body,html {
+width:100%; font:normal 16px 'Marcellus'; color:#f0f0f0;
+}
+body {
+background:rgb(28,30,29); font:normal 16px 'Marcellus',sans-serif; color:rgb(228,230,229);
+}
+
+#top {
+width:100%; height:50px; background:rgba(16,16,16,0.35)/*rgb(148,72,57) rgb(228,230,230)*/; border-bottom:0 solid rgb(41,41,41)/*rgb(166,151,151)*/; position:relative;
+box-shadow:inset 0 -3px 0 rgb(16,16,16);
+}
+	#brand {
+	min-width:10px; padding:9px 9px 9px 20px; text-align:left; margin:0; font-style:italic; font-family:'Molle'; font-size:1.6em; color:rgb(191,107,90); text-shadow:0 1px 0 rgb(92,45,36); position:absolute; cursor:default;
+	}
+	#menu {
+	width:173px; height:100%; margin:0 auto; color:black;
+	}
+		#menu ul,#contact ul {
+		display:block; width:100%; height:100%;
+		}
+			#menu ul li,#contact ul li {
+			display:inline; float:left; min-width:20px; padding:10px; text-align:center; margin:6px 8px 6px 8px; min-height:20px;
+			background:url(i/sprite.png); position:relative;
+			}
+				#menu .label,#contact .label,#Compatibility .label {
+				min-width:90px; min-height:20px; background:black; position:absolute; bottom:0; padding:1px 7px 4px 7px; border-radius:3px; text-align:center; color:white;
+				}
+	#contact {
+	width:40px; height:100%; position:absolute; right:20px; top:6px;
+	}
+#wrapper {
+width:94%; margin:12px auto 50px auto;
+}
+	#note-wrapper {
+	width:100%; min-height:100px; float:left; clear:both;
+	}
+		#preview canvas {
+		position:absolute; left:0; top:0; width:100%; height:100%;
+		}
+		#syntax {
+		box-shadow:0 1px 0 rgb(52,57,52); font-size:1.1em;
+		}
+			#syntax pre {
+			font-family:'Source Code Pro'; text-align:left; line-height:1.8em; display:block; margin:0; font-size:0.85em; padding:7px 0 7px 15px;
+			border-bottom:1px dashed rgb(64,70,64); border-left:1px dashed rgb(64,70,64); background:rgba(16,17,16,0.55);
+			box-shadow: inset 1px -2px 3px rgb(16,16,16);
+			}
+				#syntax pre b {
+				color:rgb(221,235,151);
+				}
+				#syntax pre or {
+				color:rgb(235,207,151);
+				}
+	.box-wrapper {
+	width:100%; min-height:100px; float:left; clear:both; margin-bottom:50px;
+	}
+		.box-wrapper a {
+		color:rgb(148,72,57);
+		}
+			.box-wrapper a:hover {
+			text-decoration:underline;
+			}
+		#about {
+		background:; padding:10px; border-bottom:1px solid rgb(16,16,16);
+		box-shadow:0 1px 0 rgb(52,57,52); text-align:justify; color:rgb(173,205,210)/*rgb(202,205,205)*/; text-shadow:0 -1px 0 rgb(37,39,38);
+		}
+			#about a {
+			text-decoration:underline; color:rgb(145,216,249);
+			}
+		.box {
+		width:600px; min-height:20px; margin:60px auto 60px auto; clear:both;
+		}
+		.box-title {
+		font-size:2em; padding-top:20px; text-align:center; color:rgb(163,168,166); text-shadow:0 -1px 0 rgb(0,0,0);
+		}
+	#sidebar {
+	float:left; width:220px; min-height:200px; border-right:1px solid rgb(64,70,64); margin:50px 0 0; padding:20px 0 0 0;
+	box-shadow:inset -1px 0 0 rgb(16,16,16);
+	}
+		#sidebar ul {
+		width:100%; display:block; float:left;
+		}
+			#sidebar ul li {
+			display:block; min-width:100px; float:left; text-align:left; clear:both; margin:5px 0 5px 0; color:rgb(163,168,166); cursor:pointer;
+			}
+				#sidebar ul li:hover {
+				text-decoration:underline;
+				}
+				#sidebar ul li.sub1 {
+				padding-left:40px; font-size:0.8em;
+				}
+	#doc-content {
+	min-width:500px; max-width:800px;float:left; min-height:100px; margin:50px 0 0 30px; padding:20px 0 0 0;
+	}
+		.doc-spotlight {
+		float:left; min-height:10px; padding:10px; background:rgb(16,16,16); font-size:1.135em; border-bottom:2px solid rgb(0,0,0); text-shadow:0 -1px 0 black; color:rgb(163,168,166); clear:right;
+		}
+			.doc-spotlight a {
+			font:inherit; color:rgb(148,72,57);
+			}
+		.doc-box-wrapper {
+		float:left; width:100%; height:100px; margin:20px 0 0 0; text-align:justify; color:rgb(202,204,204); text-shadow:0 -1px 0 black;
+		}
+			#footer {
+			width:100%; clear:both; float:left; min-height:10px; margin-top:50px; padding:20px 0 50px 0; border-top:1px solid rgb(64,70,64);
+			text-align:center; font-size:0.9em;
+			box-shadow:0 -1px 0 rgb(16,16,16);
+			}
+			.doc-box-subtitle {
+			font-size:1.1em; float:left; margin:0 0 10px 0; color:rgb(163,168,166); clear:both; text-align:left; color:rgb(148,72,57);
+			}
+			.doc-box-title {
+			font-size:1.6em; float:left; margin:20px 0 10px 0; color:rgb(163,168,166); clear:both;
+			}
+			.doc-box {
+			float:left; margin:10px 0 30px 0; clear:both;
+			}
+				.doc-box a {
+				text-decoration:underline;
+				}
+				.doc-box b {
+				color:rgb(203,205,204);
+				}
+				.doc-box code {
+				
+				}
+				.doc-box p {
+				display:block; font-size:0.965em; min-height:1em;
+				}
+					.doc-box p.def {
+					font-size:0.9em; color:rgb(138,146,121);
+					}
+					.doc-box p.def2 {
+					font-size:0.9em; color:rgb(173,205,210);
+					}
+				.doc-box pre {
+				font-family:'Source Code Pro'; text-align:left; line-height:1.8em; display:block; margin:25px 0 25px 0; font-size:0.9em; padding:15px 15px 15px 15px; clear:both;
+				border-bottom:1px dashed rgb(64,70,64); border-left:1px dashed rgb(64,70,64); word-wrap:break-word; width:769px; max-width:769px; background:rgba(16,17,16,0.55);
+				box-shadow: inset 1px -2px 3px rgb(16,16,16);
+				}
+				.doc-box samp {
+				font-family:'Source Code Pro'; color:rgb(145,216,249);
+				}
+				.doc-box ul {
+				display:block; width:800px; float:left; margin:30px 0 0 0; font-size:0.9em; position:relative;
+				}
+				.doc-box ul li {
+				float:left; padding:15px 0 10px 0; width:220px; margin:2px 0 2px 0; position:relative;
+				}
+					.doc-box ul li.des {
+					border-top:1px dashed rgb(54,54,54); width:360px; margin-right:70px; float:left;
+					}
+						.doc-box ul li.des b {
+						color:rgb(211,62,21);
+						}
+					.doc-box ul li.req {
+					border-top:1px dashed rgb(54,54,54); width:150px;
+					}
+				.doc-box ul li.icon {
+				width:100px; height:100px; background:url(i/sprite.png) no-repeat 0 0;
+				}
+				.doc-box-demo {
+				width:800px; margin:25px 0 25px 0; clear:both; padding:15px 0 15px 20px;
+				width:100%; max-width:800px; background:rgba(16,17,16,0.55); position:relative;
+				box-shadow: inset 1px -2px 3px rgb(16,16,16); float:left;
+				}
+					.doc-box-demo canvas {
+					width:780px; z-index:999; position:relative;
+					}
+					.doc-box-demo p.demo {
+					display:block; padding:10% 0 0 0; width:100%; text-align:center; position:absolute; top:0; left:0; color:rgb(65,69,68);
+					}
+					.doc-box-demo p.text {
+					float:left; margin:0; padding:0; position:relative; text-align:center; width:100%; height:85px; color:rgb(102,108,107);
+					}
+					.doc-box-demo samp {
+					font-family:'Source Code Pro';
+					}
+	.demo-wrapper {
+	width:800px; margin:50px auto 0 auto; padding:10px 0 10px 0; min-height:100px;
+	}
+		.demo-wrapper .doc-box-demo {
+		padding:0; margin:15px 0 0 0; border:0; box-shadow:0 0 0 black; float:left;
+		}
+		.demo-wrapper .doc-box-demo canvas {
+		width:100%; margin:0;
+		}
+		.demo-wrapper .doc-box-demo p {
+		padding-top:8.45%;
+		}
+			.doc-box-des {
+			width:100%; min-height:30px; margin-bottom:40px; float:left;
+			}
+				.doc-box-des pre {
+				font-family:'Source Code Pro'; text-align:left; line-height:1.8em; float:left; margin-top:1px; font-size:0.85em; padding:15px; clear:both;
+				border-bottom:1px dashed rgb(64,70,64); border-left:1px dashed rgb(64,70,64); word-wrap:break-word; width:769px; max-width:769px; background:rgba(16,17,16,0.55);
+				box-shadow: inset 1px -2px 3px rgb(16,16,16);
+				}
+.note {
+width:500px; height:350px; background:/*rgb(44,100,110)*/; margin:70px 0 0 80px; position:relative; border-width:0 0 1px 0; border-style:solid; border-color:rgb(16,16,16);
+float:left; padding:25px; color:rgb(163,168,166); text-align:center; text-shadow:0 -1px 0 black/*rgb(59,133,146)*/; border-radius:1px; display:block;
+}
+	.note p {
+	display:table-cell; vertical-align:middle;
+	}
+	.note-back {
+	background:rgba(16,17,16,0.55); border-color:rgb(93,45,36); text-shadow:0 1px 0 rgb(191,107,90);
+	border-left:0px solid rgb(16,16,16); border-bottom:0;
+	box-shadow: inset 2px 2px 3px rgb(16,16,16);
+	}
+.separator {
+width:800px; height:0; border-top:1px solid rgb(16,16,16); border-bottom:1px solid rgb(52,57,52); clear:both; margin:0 auto;
+}
+.vert-shader-1,.vert-shader-2 {
+width:1px; height:100%; position:absolute; background:rgb(47,52,50); top:0;
+}
+.vert-shader-2 {
+background:rgba(255,255,255,0.25);
+}
+.hor-shader-1,.hor-shader-2,.hor-shader-3 {
+width:100%; height:1px; position:absolute; background:rgb(47,52,50); left:0;
+}
+.hor-shader-2 {
+background:rgba(255,255,255,0.25);
+}
+.hor-shader-3 {
+background:rgb(166,151,151);
+}
+.left {
+left:0;
+}
+.right {
+right:0;
+}
+.top {
+top:0;
+}
+.bottom {
+bottom:0;
+}
+.libjs {
+font-family:'Molle',cursive; font-style:italic;
+}
