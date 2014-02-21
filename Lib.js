@@ -45,12 +45,25 @@ Sprite.prototype.render = function(ctx) {
 	}
 	if(this.dir == 'horizontal') x += this.size[0]*frame;
 	else y += this.size[1]*frame;
-	ctx.drawImage(Lib.resources[this.url],x,y,this.size[0],this.size[1],0,0,this.size[0],this.size[1]);
+
+	var width = this.size[0];
+	var height = this.size[1];
+	if(this.scale) {
+		width *= this.scale;
+		height *= this.scale;
+
+		this.width = width;
+		this.height = height;
+	}
+
+	ctx.drawImage(Lib.resources[this.url],x,y,this.size[0],this.size[1],0,0,width,height);
 };
 var Lib = {
 	canvas:null,
 	canvases:[],
 	ctx:null,
+    offset:{x:0,y:0},
+	detached:null,
 	entities:{},
 	entityExists:{},
 	entityReadyEvents:{},
@@ -65,6 +78,50 @@ var Lib = {
 	readyEvents:[],
 	resources:{},
 	events:{
+		attach:function() {
+			Lib.detached = null;
+			this._detach = false;
+		},
+		detach:function() {
+			Lib.detached = this;
+			this._detach = true;
+            Lib.detached.storedX = this.getX();
+            Lib.detached.storedY = this.getY();
+		},
+        setScrollX:function(a){
+            Lib.offset.x = a;
+        },
+        setScrollY:function(a){
+            Lib.offset.y = a;
+        },
+        getSize:function() {
+        	return this.size;
+        },
+        getScrollX:function(){
+            return Lib.offset.x;
+        },
+        getScrollY:function(){
+            return Lib.offset.y;
+        },
+		increaseScrollX:function(a) {
+			if(a) Lib.offset.x += (this.speed * time.dt) * a;
+			else Lib.offset.x += this.speed * time.dt;
+		},
+		increaseScrollY:function(a) {
+			if(a) Lib.offset.y += (this.speed * time.dt) * a;
+			else Lib.offset.y += this.speed * time.dt;
+		},
+		decreaseScrollX:function(a) {
+			if(a) Lib.offset.x -= (this.speed * time.dt) * a;
+			else Lib.offset.x -= this.speed * time.dt;
+		},
+		decreaseScrollY:function(a) {
+			if(a) Lib.offset.y -= (this.speed * time.dt) * a;
+			else Lib.offset.y -= this.speed * time.dt;
+		},
+        isDetached:function(){
+            return (Lib.detached !== null);
+        },
 		click:function(a) {
 			requireID();
 			if(!Lib.eventQueue[Lib.id]) Lib.eventQueue[Lib.id] = [];
@@ -75,7 +132,7 @@ var Lib = {
 			//this.stopAnimation();
 		},
 		getHeight:function() {
-			return this.sprite.size[1];
+			return this.sprite.scale ? this.sprite.height : this.sprite.size[1];
 		},
 		getSpriteWidth:function() {
 			return this.sprite.src.width || this.settings.size[0];
@@ -87,7 +144,7 @@ var Lib = {
 			return this.sprite.pos[1];
 		},
 		getWidth:function() {
-			return this.sprite.size[0];
+			return this.sprite.scale ? this.sprite.width : this.sprite.size[0];
 		},
 		load:function(a) {
 			requireID();
@@ -176,9 +233,21 @@ var Lib = {
 			return this.settings.size[0] || this.getLineWidth();
 		},
 		getX:function() {
-			return this.x;
+			return this.x + Lib.offset.x;
 		},
 		getY:function() {
+			return this.y + Lib.offset.y;
+		},
+		getNoScrollX:function() {
+			return this.x;
+		},
+		getNoScrollY:function() {
+			return this.y;
+		},
+		getNoScrollX:function() {
+			return this.x;
+		},
+		getNoScrollY:function() {
 			return this.y;
 		},
 		hide:function() {
@@ -522,6 +591,7 @@ var Lib = {
 			id:null,
 			src:null,
 			size:null,
+			scale:null,
 			speed:100,
 			frequency:16,
 			position:[0,0],
@@ -551,6 +621,7 @@ var Lib = {
 			id:Lib.id,
 			x:settings.x,
 			y:settings.y,
+			size:settings.size,
 			speed:settings.speed,
 			settings:settings,
 			image:new Image(),
@@ -603,6 +674,7 @@ var Lib = {
 			self.y = self.settings.y;
 			self.sprite = new Sprite(self.settings.src,self.settings.size,self.settings.frequency,self.settings.position,self.settings.direction,self.settings.frames,self.canvas);
 			if(self.settings.reverse) self.sprite.reverseAnimation = true;
+			if(self.settings.scale) self.sprite.scale = self.settings.scale;
 			Lib.addObject(self,self.id);
 			Lib.resources[self.settings.src] = this;
 			if(Lib.eventQueue[self.id]) {
@@ -692,20 +764,19 @@ function update(dt) {
 };
 function render() {
 	var ctx;
-/*	for(var i=0;i<Lib.objects.length;i++) {
-		ctx = Lib.objects[i].ctx;
-		ctx.save();
-		ctx.translate(Lib.objects[i].x,Lib.objects[i].y);
-		if(Lib.objects[i].settings.type == "sprite") {
-			if(!Lib.objects[i].isHidden) Lib.objects[i].sprite.render(ctx);
-		} else if(!Lib.objects[i].isHidden) Lib.objects[i].render(ctx);
-		ctx.restore();
-	}*/
 	for(var i=0;i<Lib.canvases.length;i++) {
 		ctx = Lib.canvases[i].getContext("2d");
 		for(var x=0;x<Lib.canvases[i].objects.length;x++) {
+			var xpos = Lib.canvases[i].objects[x].x;
+			var ypos = Lib.canvases[i].objects[x].y;
+			if(Lib.detached) {
+				if(Lib.detached.id != Lib.canvases[i].objects[x].id) {
+					xpos -= Lib.offset.x;
+					ypos -= Lib.offset.y;
+				}
+			}
 			ctx.save();
-			ctx.translate(Lib.canvases[i].objects[x].x,Lib.canvases[i].objects[x].y);
+			ctx.translate(xpos,ypos);
 			if(Lib.canvases[i].objects[x].settings.type == "sprite") {
 				if(!Lib.canvases[i].objects[x].isHidden) Lib.canvases[i].objects[x].sprite.render(ctx);
 			} else if(!Lib.canvases[i].objects[x].isHidden) Lib.canvases[i].objects[x].render(ctx);
