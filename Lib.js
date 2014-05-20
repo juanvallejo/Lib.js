@@ -238,10 +238,10 @@ var Lib = {
 		getY:function() {
 			return this.y + Lib.offset.y;
 		},
-		getNoScrollX:function() {
+		getFixedX:function() {
 			return this.x;
 		},
-		getNoScrollY:function() {
+		getFixedY:function() {
 			return this.y;
 		},
 		getNoScrollX:function() {
@@ -366,6 +366,11 @@ var Lib = {
 	},
 	hasInputKey:function(a) {
 		return Lib.keys[a];
+	},
+	removeInputKey:function(a) {
+		if(this.keys[a]) {
+			this.keys[a] = null;
+		}
 	},
 	load:function(a) {
 		Lib.readyEvents.push(a);
