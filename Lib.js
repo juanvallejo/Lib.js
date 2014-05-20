@@ -233,10 +233,10 @@ var Lib = {
 			return this.settings.size[0] || this.getLineWidth();
 		},
 		getX:function() {
-			return this.x + Lib.offset.x;
+			return (this.x / (this.sprite.scale * 3 || 1)) + Lib.offset.x;
 		},
 		getY:function() {
-			return this.y + Lib.offset.y;
+			return (this.y / (this.sprite.scale * 3 || 1)) + Lib.offset.y;
 		},
 		getFixedX:function() {
 			return this.x;
@@ -374,6 +374,11 @@ var Lib = {
 	},
 	load:function(a) {
 		Lib.readyEvents.push(a);
+	},
+	log:function(a) {
+		if(parseInt(Math.random() * 1000) < 4) {
+			console.log("> "+a);
+		}
 	},
 	logfps:function() {
 		if(!debug._mainCalled) console.log("WARNING: To conserve resources, no frames will be logged until objects are added to the canvas.");
