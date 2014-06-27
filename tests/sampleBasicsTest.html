@@ -31,50 +31,57 @@ Lib('guy').sprite({
 	src:"/graphics/guy2.png",
 	size:[50,100],
 	position:[0,200],
-	speed:100,
+	speed:120,
 	frequency:13,
 	x:'center',
 	y:'center'
 });
-Lib("guy2").sprite({
+Lib('guy2').sprite({
 	src:"/graphics/guy2.png",
 	size:[50,100],
 	position:[0,200],
 	speed:100,
 	frequency:13,
 	x:'left',
-	y:'center'
+	y:'top'
 });
 Lib.load(function() {
 	Lib('guy').detach();
-	console.log(Lib('guy2').isDetached());
 	Lib.addInputRule(function() {
 		var obj = Lib("guy");
 		Lib.stopAnimation(canvas[1]);
 		if(Lib.hasInputKey(39)) {
-			if(obj.getX() >= Lib.getCanvas().width) obj.setX(-obj.getWidth());
+			// if(obj.getX() >= Lib.getCanvas().width) obj.setX(-obj.getWidth());
+			if(obj.getX() + obj.getWidth() >= Lib.getCanvas().width) obj.increaseOffsetX();
+			else obj.increaseX();
 			obj.setSpriteX(0);
 			obj.setSpriteY(100);
 			obj.reverseAnimation(false);
-			obj.increaseX();
+			// obj.increaseX();
 		}
 		if(Lib.hasInputKey(37)) {
-			if(obj.getX() + obj.getWidth() <= 0) obj.setX(Lib.getCanvas().width);
+			// if(obj.getX() + obj.getWidth() <= 0) obj.setX(Lib.getCanvas().width);
+			if(obj.getX() <= 0) obj.decreaseOffsetX();
+			else obj.decreaseX();
 			obj.setSpriteY(0);
 			obj.setSpriteX(0);
 			obj.reverseAnimation(true);
-			obj.decreaseX();
+			// obj.decreaseX();
 		}
 		if(Lib.hasInputKey(40)) {
-			if(obj.getY() >= Lib.getCanvas().height) obj.setY(-obj.getHeight());
+			// if(obj.getY() >= Lib.getCanvas().height) obj.setY(-obj.getHeight());
+			if(obj.getY() + obj.getHeight() > Lib.getCanvas().height) obj.increaseOffsetY();
+			else obj.increaseY();
 			obj.setSpriteX(0);
 			obj.setSpriteY(200);
 			obj.reverseAnimation(false);
-			obj.increaseY();
+			// obj.increaseScrollY();
 		}
 		if(Lib.hasInputKey(38)) {
-			if(obj.getY() + obj.getHeight() <= 0) obj.setY(Lib.getCanvas().height);
-			obj.decreaseY();
+			// if(obj.getY() + obj.getHeight() <= 0) obj.setY(Lib.getCanvas().height);
+			if(obj.getY() <= 0) obj.decreaseOffsetY();
+			else obj.decreaseY();
+			// obj.decreaseScrollY();
 			obj.setSpriteX(0);
 			obj.setSpriteY(300);
 			obj.reverseAnimation(false);
