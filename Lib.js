@@ -73,6 +73,7 @@ var Lib = {
 	entityReadyEvents:{},
 	eventQueue:{},
 	extensions:{},
+	externalRenderings:[],
 	id:null,
 	keys:{},
 	loaded:false,
@@ -98,8 +99,23 @@ var Lib = {
         setOffsetY:function(a){
             Lib.offset.y = a;
         },
+        getID:function() {
+			return this.id;
+		},
         getSize:function() {
         	return this.size;
+        },
+        getPosition:function() {
+        	return this.settings.position;
+        },
+        getAnimationStatus:function() {
+        	return this.spritesheet.reverseAnimation;
+        },
+        getSpeed:function() {
+        	return this.settings.speed;
+        },
+        getFrequency:function() {
+        	return this.settings.frequency;t
         },
         getDetachedX:function() {
 			return this.x + Lib.offset.x;
@@ -142,19 +158,19 @@ var Lib = {
 			//this.stopAnimation();
 		},
 		getHeight:function() {
-			return this.sprite.scale ? this.sprite.height : this.sprite.size[1];
+			return this.spritesheet.scale ? this.spritesheet.height : this.spritesheet.size[1];
 		},
 		getSpriteWidth:function() {
-			return this.sprite.src.width || this.settings.size[0];
+			return this.spritesheet.src.width || this.settings.size[0];
 		},
 		getSpriteX:function() {
-			return this.sprite.pos[0];
+			return this.spritesheet.pos[0];
 		},
 		getSpriteY:function() {
-			return this.sprite.pos[1];
+			return this.spritesheet.pos[1];
 		},
 		getWidth:function() {
-			return this.sprite.scale ? this.sprite.width : this.sprite.size[0];
+			return this.spritesheet.scale ? this.spritesheet.width : this.spritesheet.size[0];
 		},
 		load:function(a) {
 			requireID();
@@ -166,40 +182,40 @@ var Lib = {
 			this.click(a);
 		},
 		resumeAnimation:function() {
-			this.sprite.runAnimation = true;
+			this.spritesheet.runAnimation = true;
 		},
 		reverseAnimation:function(a) {
 			var frames = [];
 			if(a) {
-				this.sprite.reverseAnimation = true;
-				for(var i=this.sprite.frames.length-1;i>=0;i--) {
+				this.spritesheet.reverseAnimation = true;
+				for(var i=this.spritesheet.frames.length-1;i>=0;i--) {
 					frames.push(i);
 				}
 			} else {
-				this.sprite.reverseAnimation = false;
-				for(var i=0;i<this.sprite.frames.length;i++) {
+				this.spritesheet.reverseAnimation = false;
+				for(var i=0;i<this.spritesheet.frames.length;i++) {
 					frames.push(i);
 				}
 			}
-			this.sprite.frames = frames;
+			this.spritesheet.frames = frames;
 		},
 		setFrames:function(a) {
-			if(a instanceof Array) this.sprite.frames = a;
+			if(a instanceof Array) this.spritesheet.frames = a;
 		},
 		setFrequency:function(a) {
-			this.sprite.frequency = a;
+			this.spritesheet.frequency = a;
 		},
 		setSpriteX:function(a) {
-			this.sprite.pos[0] = a;
+			this.spritesheet.pos[0] = a;
 		},
 		setSpriteY:function(a) {
-			this.sprite.pos[1] = a;
+			this.spritesheet.pos[1] = a;
 		},
 		sprite:function() {
 			throw "Error: An object with that id already exists.";
 		},
 		stopAnimation:function() {
-			this.sprite.runAnimation = false;
+			this.spritesheet.runAnimation = false;
 		},
 		unfreeze:function() {
 			this.resumeAnimation();
@@ -228,7 +244,8 @@ var Lib = {
 			requireID();
 			if(!Lib.extensions[Lib.id]) Lib.extensions[Lib.id] = {};
 			Lib.extensions[Lib.id][a] = b;
-			if(Lib.loaded && Lib.entities[Lib.id]) Lib.entities[Lib.id][a] = b;
+			if(Lib.loaded && Lib.entities[Lib.id]) Lib.entities[Lib.id][a] = b,console.log('good');
+			else console.log(Lib.loaded);
 		},
 		extendType:function(a,b) {
 			if(this.settings.type == "sprite") Lib.spriteEvents[a] = b;
@@ -273,7 +290,7 @@ var Lib = {
 		},
 		setWidth:function(a) {
 			if(this.settings.type == "line") this.settings.width = a;
-			else if(this.settings.type == "sprite") this.sprite.size[0] = a;
+			else if(this.settings.type == "sprite") this.spritesheet.size[0] = a;
 			else this.settings.size[0] = a;
 		},
 		setX:function(a) {
@@ -332,6 +349,9 @@ var Lib = {
 		addInputRule:function(a) {
 			Lib.inputRules.push(a);
 		},
+		addCustomObject:function(a) {
+			Lib.externalRenderings.push(a);
+		},
 		addObject:function(o,id) {
 			if(id) Lib.entities[id] = o;
 			Lib.objects.push(o);
@@ -339,6 +359,9 @@ var Lib = {
 		},
 		getCanvas:function() {
 			return Lib.canvas;
+		},
+		getCTX:function() {
+			return Lib.ctx;
 		},
 		getObject:function(a) {
 			return Lib.entities[a];
@@ -420,7 +443,7 @@ var Lib = {
 			//	}
 				var objects = canvas.objects;
 				for(var i=0;i<objects.length;i++) {
-					if(objects[i].settings.type == "sprite") objects[i].sprite.runAnimation = true;
+					if(objects[i].settings.type == "sprite") objects[i].spritesheet.runAnimation = true;
 				}
 			}
 		},
@@ -433,9 +456,13 @@ var Lib = {
 			//	}
 				var objects = canvas.objects;
 				for(var i=0;i<objects.length;i++) {
-					if(objects[i].settings.type == "sprite") objects[i].sprite.runAnimation = false;
+					if(objects[i].settings.type == "sprite") objects[i].spritesheet.runAnimation = false;
 				}
 			}
+		},
+		setSprite:function(data) {
+			Lib.id = data.id;
+			Lib.events.sprite(data);
 		},
 		setCanvas:function(a,b) {
 			requireCanvas(a);
@@ -601,6 +628,7 @@ var Lib = {
 			Lib.sprite(settings);
 		},
 		sprite:function(a,b,c,d,e,f) {
+			requireID();
 			requireCanvas();
 			var settings = {
 				type:"sprite",
@@ -688,9 +716,9 @@ var Lib = {
 				else if(self.settings.y == 'top' || !self.settings.y || typeof self.settings.y == 'string') self.settings.y = 0;
 				self.x = self.settings.x;
 				self.y = self.settings.y;
-				self.sprite = new Sprite(self.settings.src,self.settings.size,self.settings.frequency,self.settings.position,self.settings.direction,self.settings.frames,self.canvas);
-				if(self.settings.reverse) self.sprite.reverseAnimation = true;
-				if(self.settings.scale) self.sprite.scale = self.settings.scale;
+				self.spritesheet = new Sprite(self.settings.src,self.settings.size,self.settings.frequency,self.settings.position,self.settings.direction,self.settings.frames,self.canvas);
+				if(self.settings.reverse) self.spritesheet.reverseAnimation = true;
+				if(self.settings.scale) self.spritesheet.scale = self.settings.scale;
 				Lib.events.addObject(self,self.id);
 				Lib.resources[self.settings.src] = this;
 				if(Lib.eventQueue[self.id]) {
@@ -718,8 +746,8 @@ var Lib = {
 				}
 				if(!Lib.loaded) {
 					if(Lib.objects.length == Lib.pending.length) {
+						Lib.loaded = true;
 						for(var i=0;i<Lib.readyEvents.length;i++) {
-							Lib.loaded = true;
 							Lib.readyEvents[i].call(Lib);
 						}
 					}
@@ -775,7 +803,7 @@ function update(dt) {
 		}
 	}
 	for(var i=0;i<Lib.objects.length;i++) {
-		if(Lib.objects[i].settings.type == "sprite") Lib.objects[i].sprite.update(dt);
+		if(Lib.objects[i].settings.type == "sprite") Lib.objects[i].spritesheet.update(dt);
 	}
 	time.ellapsed++;
 };
@@ -795,9 +823,12 @@ function render() {
 			ctx.save();
 			ctx.translate(xpos,ypos);
 			if(Lib.canvases[i].objects[x].settings.type == "sprite") {
-				if(!Lib.canvases[i].objects[x].isHidden) Lib.canvases[i].objects[x].sprite.render(ctx);
+				if(!Lib.canvases[i].objects[x].isHidden) Lib.canvases[i].objects[x].spritesheet.render(ctx);
 			} else if(!Lib.canvases[i].objects[x].isHidden) Lib.canvases[i].objects[x].render(ctx);
 			ctx.restore();
+			Lib.externalRenderings.forEach(function(rendering) {
+				rendering.call(Lib,ctx);
+			});
 		}
 	}
 };

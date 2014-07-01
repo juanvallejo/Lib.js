@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8"/>
+    <title>Lib.js multiplayer</title>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/data/data.js"></script>
+<script src="/Lib.js"></script>
+<style>
+body,html {
+padding:0; margin:0;
+}
+body {
+background:#2d2d2d;
+}
+</style>
+</head>
+<body>
+<canvas></canvas><!--#demo-->
+<script>
+console.clear();
+var id;
+var playerTemplate;
+var playerdata;
+var canvas = document.getElementsByTagName("canvas");
+var socket = io.connect('http://'+window.location.hostname);
+for(var i=0;i<canvas.length;i++) {
+	canvas[i].addEventListener('focus',function() {
+		Site.canvasFocused = true;
+	});
+	canvas[i].addEventListener('blur',function() {
+		Site.canvasFocused = false;
+	});
+}
+Lib.setCanvas(canvas[0],{resize:true});
+
+socket.on('welcome',function(data) {
+	id = data.id;
+	playerdata = data.playerdata;
+	playerTemplate = {
+		id:data.id,
+		src:"/graphics/guy2.png",
+		size:[50,100],
+		position:[0,200],
+		speed:120,
+		frequency:13,
+		x:'center',
+		y:'center'
+	};
+	console.log('got other players');
+	console.log(data.playerdata);
+	console.log('Server connection established. Client id '+id);
+
+	socket.emit('playerdata',playerTemplate);
+	socket.emit('playerregister',playerTemplate);
+});
+socket.on('playerregister',function(data) {
+	console.log('main player has been registered with the server. You may now render it. ID '+data.id);
+	Lib(id).sprite(data);
+	Lib(id).load(function() {
+		console.log('Main character sprite has loaded. Using ID '+id+' to render.');
+		var player = Lib(id);
+		player.stopAnimation();
+		player.detach();
+		Lib.addInputRule(function() {
+			drawTag(player);
+			if(Lib.hasInputKey(39)) {
+				// if(player.getX() + player.getWidth() >= Lib.getCanvas().width) player.increaseOffsetX();
+				// else player.increaseX();
+				player.setSpriteX(0);
+				player.setSpriteY(100);
+				player.reverseAnimation(false);
+				player.increaseOffsetX();
+				emitPlayerData(player);
+			}
+			if(Lib.hasInputKey(37)) {
+				// if(player.getX() <= 0) player.decreaseOffsetX();
+				// else player.decreaseX();
+				player.setSpriteY(0);
+				player.setSpriteX(0);
+				player.reverseAnimation(true);
+				player.decreaseOffsetX();
+				emitPlayerData(player);
+			}
+			if(Lib.hasInputKey(40)) {
+				// if(player.getY() + player.getHeight() > Lib.getCanvas().height) player.increaseOffsetY();
+				// else player.increaseY();
+				player.setSpriteX(0);
+				player.setSpriteY(200);
+				player.reverseAnimation(false);
+				player.increaseOffsetY();
+				emitPlayerData(player);
+			}
+			if(Lib.hasInputKey(38)) {
+				// if(player.getY() <= 0) player.decreaseOffsetY();
+				// else player.decreaseY();
+				player.setSpriteX(0);
+				player.setSpriteY(300);
+				player.reverseAnimation(false);
+				player.decreaseOffsetY();
+				emitPlayerData(player);
+			}
+			if(Lib.hasInput() && (Lib.hasInputKey(39) || Lib.hasInputKey(37) || Lib.hasInputKey(40) || Lib.hasInputKey(38) || Lib.hasInputKey(32))) player.resumeAnimation();
+			else player.stopAnimation();
+		});
+
+		for(var i in playerdata) {
+			renderPlayer(playerdata[i]);
+		}
+	});
+});
+socket.on('playerdata',function(data) {
+	console.log('playerdata received for client '+data.id+'... drawing client');
+	renderPlayer(data);
+});
+socket.on('playerdisconnect',function(data) {
+	console.log(data.id+' has disconnected');
+	if(Lib(data.id) && Lib(data.id).hide) Lib(data.id).hide();
+	else console.log('Player '+data.id+' does not exist.');
+});
+socket.on('message',function(data) {
+	console.log(data.message);
+});
+socket.on('playerupdate',function(data) {
+	console.log('PlayerUpdate requested for client '+data.id);
+	updatePlayer(data);
+	// Lib(data.id).resumeAnimation();
+});
+socket.on('command',function(data) {
+	if(data.command == 'refresh') {
+		window.location.reload();
+	}
+});
+
+function renderPlayer(data) {
+	console.log('rendering player from data. ID '+data.id);
+	Lib(data.id).sprite(data);
+	Lib(data.id).load(function() {
+		Lib(data.id).stopAnimation();
+	});
+}
+function updatePlayer(data) {
+	var player = Lib(data.id);
+	console.log('updating data for client '+data.id);
+	player.setY(data.playerdata.y);
+	player.setX(data.playerdata.x);
+	player.setSpriteX(data.playerdata.position[0]);
+	player.setSpriteY(data.playerdata.position[1]);
+	player.reverseAnimation(data.playerdata.reverse);
+}
+function emitPlayerData(player) {
+	console.log('Emitting player data for client '+player.getID());
+	socket.emit('playerupdate',{
+		id:player.getID(),
+		playerdata:{
+			'id':player.getID(),
+			'kind':'sprite',
+			'src':'/graphics/guy2.png',
+			'size':player.getSize(),
+			'position':player.getPosition(),
+			'speed':player.getSpeed(),
+			'frequency':player.getFrequency(),
+			'x':player.getX()+player.getOffsetX(),
+			'y':player.getY()+player.getOffsetY(),
+			'displayid':true,
+			'reverse':player.getAnimationStatus()
+		}
+	});
+}
+function drawTag(player) {
+// 	var tag = player.getID();
+// 	var tagSize;
+// 	Lib.addCustomObject(function(ctx) {
+// 		tagSize = ctx.measureText(tag);
+// 		ctx.font = "40px Georgia";
+// 		ctx.fillStyle = "white";
+// 		ctx.fillText(tag,player.getX() - (tagSize.width / 2),player.getY() - (player.getHeight() / 4));
+// 	});
+}
+</script>
+</body>
+</html>
