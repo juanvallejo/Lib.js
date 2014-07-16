@@ -19,11 +19,22 @@ background:#2d2d2d;
 <canvas></canvas><!--#demo-->
 <script>
 console.clear();
+//loadedscenetest
+var sceneLoaded = false;
+var sceneTileSize = 320;
+var sceneMaxTileLoad = 5;
+var loadedSceneTiles = 0;
+var loadedSceneHorTop = 0;
+var loadedSceneHorBot = 0;
+var loadedSceneVerLeft = 0;
+var loadedSceneVerRight = 0;
+//end loadedscenetest
 var id;
+var animationTimeout = {};
 var playerTemplate;
 var playerdata;
 var canvas = document.getElementsByTagName("canvas");
-var socket = io.connect('http://'+window.location.hostname);
+var server = io.connect('http://'+window.location.hostname);
 for(var i=0;i<canvas.length;i++) {
 	canvas[i].addEventListener('focus',function() {
 		Site.canvasFocused = true;
@@ -34,37 +45,43 @@ for(var i=0;i<canvas.length;i++) {
 }
 Lib.setCanvas(canvas[0],{resize:true});
 
-socket.on('welcome',function(data) {
+drawScene();
+server.on('welcome',function(data) {
 	id = data.id;
 	playerdata = data.playerdata;
 	playerTemplate = {
-		id:data.id,
-		src:"/graphics/guy2.png",
-		size:[50,100],
-		position:[0,200],
-		speed:120,
 		frequency:13,
+		id:data.id,
+		index:1,
+		position:[0,200],
+		size:[50,100],
+		speed:120,
+		src:'/graphics/guy2.png',
 		x:'center',
 		y:'center'
 	};
-	console.log('got other players');
-	console.log(data.playerdata);
-	console.log('Server connection established. Client id '+id);
+	Lib.log(data.playerdata);
+	Lib.log('Server connection established. Client id '+id);
 
-	socket.emit('playerdata',playerTemplate);
-	socket.emit('playerregister',playerTemplate);
+	server.emit('playerdata',playerTemplate);
+	server.emit('playerregister',playerTemplate);
 });
-socket.on('playerregister',function(data) {
-	console.log('main player has been registered with the server. You may now render it. ID '+data.id);
+server.on('playerregister',function(data) {
+	Lib.log('main player has been registered with the server. You may now render it. ID '+data.id);
 	Lib(id).sprite(data);
 	Lib(id).load(function() {
-		console.log('Main character sprite has loaded. Using ID '+id+' to render.');
+		Lib.log('Main character sprite has loaded. Using ID '+id+' to render.');
 		var player = Lib(id);
 		player.stopAnimation();
 		player.detach();
+		player.render(function(ctx,x,y) {
+			var tagSize = ctx.measureText(id);
+			ctx.font = "14px Georgia";
+			ctx.fillStyle = "white";
+			ctx.fillText(id,-this.getWidth() * 1.2,-this.getHeight() / 4);
+		});
 		Lib.addInputRule(function() {
-			drawTag(player);
-			if(Lib.hasInputKey(39)) {
+			if(Lib.hasInputKey(68)) {
 				// if(player.getX() + player.getWidth() >= Lib.getCanvas().width) player.increaseOffsetX();
 				// else player.increaseX();
 				player.setSpriteX(0);
@@ -73,7 +90,7 @@ socket.on('playerregister',function(data) {
 				player.increaseOffsetX();
 				emitPlayerData(player);
 			}
-			if(Lib.hasInputKey(37)) {
+			if(Lib.hasInputKey(65)) {
 				// if(player.getX() <= 0) player.decreaseOffsetX();
 				// else player.decreaseX();
 				player.setSpriteY(0);
@@ -82,7 +99,7 @@ socket.on('playerregister',function(data) {
 				player.decreaseOffsetX();
 				emitPlayerData(player);
 			}
-			if(Lib.hasInputKey(40)) {
+			if(Lib.hasInputKey(83)) {
 				// if(player.getY() + player.getHeight() > Lib.getCanvas().height) player.increaseOffsetY();
 				// else player.increaseY();
 				player.setSpriteX(0);
@@ -91,7 +108,7 @@ socket.on('playerregister',function(data) {
 				player.increaseOffsetY();
 				emitPlayerData(player);
 			}
-			if(Lib.hasInputKey(38)) {
+			if(Lib.hasInputKey(87)) {
 				// if(player.getY() <= 0) player.decreaseOffsetY();
 				// else player.decreaseY();
 				player.setSpriteX(0);
@@ -100,62 +117,86 @@ socket.on('playerregister',function(data) {
 				player.decreaseOffsetY();
 				emitPlayerData(player);
 			}
-			if(Lib.hasInput() && (Lib.hasInputKey(39) || Lib.hasInputKey(37) || Lib.hasInputKey(40) || Lib.hasInputKey(38) || Lib.hasInputKey(32))) player.resumeAnimation();
-			else player.stopAnimation();
+			if(Lib.hasInput() && (Lib.hasInputKey(68) || Lib.hasInputKey(65) || Lib.hasInputKey(83) || Lib.hasInputKey(87) || Lib.hasInputKey(32))) {
+				player.resumeAnimation();
+				if(sceneLoaded) Lib.emit('move',[player]);
+			} else {
+				player.stopAnimation();
+			}
 		});
 
 		for(var i in playerdata) {
-			renderPlayer(playerdata[i]);
+			renderPlayer(playerdata[i],function(player) {
+				player.render(function(ctx,x,y) {
+					var tagSize = ctx.measureText(player.getID());
+					ctx.font = "14px Georgia";
+					ctx.fillStyle = "white";
+					ctx.fillText(player.getID(),-this.getWidth() * 1.2,-this.getHeight() / 4);
+				});
+			});
 		}
 	});
 });
-socket.on('playerdata',function(data) {
-	console.log('playerdata received for client '+data.id+'... drawing client');
-	renderPlayer(data);
+server.on('playerdata',function(data) {
+	Lib.log('playerdata received for client '+data.id+'... drawing client');
+	renderPlayer(data,function(player) {
+		player.render(function(ctx,x,y) {
+			var tagSize = ctx.measureText(player.getID());
+			ctx.font = "14px Georgia";
+			ctx.fillStyle = "white";
+			ctx.fillText(player.getID(),-this.getWidth() * 1.2,-this.getHeight() / 4);
+		});
+	});
 });
-socket.on('playerdisconnect',function(data) {
-	console.log(data.id+' has disconnected');
+server.on('playerdisconnect',function(data) {
+	Lib.log(data.id+' has disconnected');
 	if(Lib(data.id) && Lib(data.id).hide) Lib(data.id).hide();
-	else console.log('Player '+data.id+' does not exist.');
+	else Lib.log('Player '+data.id+' does not exist.');
 });
-socket.on('message',function(data) {
-	console.log(data.message);
+server.on('message',function(data) {
+	Lib.log(data.message);
 });
-socket.on('playerupdate',function(data) {
-	console.log('PlayerUpdate requested for client '+data.id);
+server.on('playerupdate',function(data) {
+	Lib.log('playerupdate requested for client '+data.id);
 	updatePlayer(data);
-	// Lib(data.id).resumeAnimation();
 });
-socket.on('command',function(data) {
+server.on('command',function(data) {
 	if(data.command == 'refresh') {
 		window.location.reload();
 	}
 });
 
-function renderPlayer(data) {
-	console.log('rendering player from data. ID '+data.id);
+function renderPlayer(data,callback) {
+	Lib.log('rendering player from data. ID '+data.id);
 	Lib(data.id).sprite(data);
 	Lib(data.id).load(function() {
-		Lib(data.id).stopAnimation();
+		Lib(this.getID()).stopAnimation();
+		if(typeof callback == 'function') callback.call(this,Lib(this.getID()));
 	});
 }
 function updatePlayer(data) {
+	Lib.log('updating data for client '+data.id);
 	var player = Lib(data.id);
-	console.log('updating data for client '+data.id);
+	player.resumeAnimation();
 	player.setY(data.playerdata.y);
 	player.setX(data.playerdata.x);
 	player.setSpriteX(data.playerdata.position[0]);
 	player.setSpriteY(data.playerdata.position[1]);
 	player.reverseAnimation(data.playerdata.reverse);
+	clearTimeout(animationTimeout[player.getID()]);
+	animationTimeout[player.getID()] = setTimeout(function() {
+		player.stopAnimation();
+	},15);
 }
 function emitPlayerData(player) {
-	console.log('Emitting player data for client '+player.getID());
-	socket.emit('playerupdate',{
+	Lib.log('Emitting player data for client '+player.getID());
+	server.emit('playerupdate',{
 		id:player.getID(),
 		playerdata:{
 			'id':player.getID(),
 			'kind':'sprite',
 			'src':'/graphics/guy2.png',
+			'index':player.getIndex(),
 			'size':player.getSize(),
 			'position':player.getPosition(),
 			'speed':player.getSpeed(),
@@ -167,15 +208,69 @@ function emitPlayerData(player) {
 		}
 	});
 }
-function drawTag(player) {
-// 	var tag = player.getID();
-// 	var tagSize;
-// 	Lib.addCustomObject(function(ctx) {
-// 		tagSize = ctx.measureText(tag);
-// 		ctx.font = "40px Georgia";
-// 		ctx.fillStyle = "white";
-// 		ctx.fillText(tag,player.getX() - (tagSize.width / 2),player.getY() - (player.getHeight() / 4));
-// 	});
+function drawScene() {
+	var sceneMaxTileLoad = Math.ceil(Lib.getCanvas().width / sceneTileSize);
+	for(var x=0;x<sceneMaxTileLoad;x++) {
+		for(var y=0;y<sceneMaxTileLoad;y++) {
+			Lib('scene-grass'+loadedSceneTiles).sprite({
+				src:'/graphics/tiles.png',
+				size:[sceneTileSize,sceneTileSize],
+				position:[0,0],
+				frames:[0],
+				x:sceneTileSize*x,
+				y:sceneTileSize*y
+			});
+			loadedSceneTiles++;
+		}
+	}
+	Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
+		sceneLoaded = true;
+		loadedSceneHorBot = Lib('scene-grass'+(loadedSceneTiles-1)).getY()+sceneTileSize;
+		loadedSceneVerRight = Lib('scene-grass'+(loadedSceneTiles-1)).getX()+sceneTileSize;
+	});
+	Lib.on('move',function(player) {
+		updateScene(player);
+	});
+}
+function updateScene(player) {
+	if(player.getOffsetX()+player.getX() <= loadedSceneVerLeft && sceneLoaded) {
+		//load tiles to the vertical left
+		sceneLoaded = false;
+		loadedSceneVerLeft -= sceneTileSize;
+		for(var i=0;i<sceneMaxTileLoad;i++) {
+			Lib('scene-grass'+loadedSceneTiles).sprite({
+				src:'/graphics/tiles.png',
+				size:[sceneTileSize,sceneTileSize],
+				position:[0,0],
+				frames:[0],
+				x:loadedSceneVerLeft,
+				y:(sceneTileSize*i)+loadedSceneHorTop
+			});
+			loadedSceneTiles++;
+		}
+		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
+			sceneLoaded = true;
+		});
+	}
+	if(player.getOffsetY()+player.getY() <= loadedSceneHorTop && sceneLoaded) {
+		//load tiles to the horizontal top
+		sceneLoaded = false;
+		loadedSceneHorTop -= sceneTileSize;
+		for(var i=0;i<sceneMaxTileLoad;i++) {
+			Lib('scene-grass'+loadedSceneTiles).sprite({
+				src:'/graphics/tiles.png',
+				size:[sceneTileSize,sceneTileSize],
+				position:[0,0],
+				frames:[0],
+				x:(sceneTileSize*i)+loadedSceneVerLeft,
+				y:loadedSceneHorTop
+			});
+			loadedSceneTiles++;
+		}
+		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
+			sceneLoaded = true;
+		});
+	}
 }
 </script>
 </body>

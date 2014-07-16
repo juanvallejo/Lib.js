@@ -18,7 +18,9 @@ var frame = (function() {
 	_reset:false,
 	_mainCalled:false,
 	_eventsInit:false,
+	_indexCountInit:false,
 	_paused:false,
+	log:false,
 	logfps:false,
 	runAnimation:true,
 	useSingleCanvasMode:false
@@ -74,6 +76,7 @@ var Lib = {
 	eventQueue:{},
 	extensions:{},
 	externalRenderings:[],
+	customevents:{},
 	id:null,
 	keys:{},
 	loaded:false,
@@ -147,6 +150,10 @@ var Lib = {
 		},
         isDetached:function(){
             return (Lib.detached !== null && Lib.detached == this);
+        },
+        render:function(a) {
+        	if(typeof a == 'function') this.renderings.push(a);
+        	else throw 'Parameter must be a function for this method.';
         },
 		click:function(a) {
 			requireID();
@@ -252,6 +259,9 @@ var Lib = {
 			else if(this.settings.type == "line") Lib.lineEvents[a] = b;
 			else if(this.settings.type == "rect") Lib.rectEvents[a] = b;
 		},
+		getIndex:function() {
+			return this.settings.index;
+		},
 		getLineWidth:function() {
 			if(this.settings.type == "sprite") return 0;
 			return this.settings.width;
@@ -353,9 +363,63 @@ var Lib = {
 			Lib.externalRenderings.push(a);
 		},
 		addObject:function(o,id) {
+			if(!debug._indexCountInit && o.index) {
+				if(o.index < -1) throw "Invalid index value. Must be at least -1.";
+				else debug._indexCountInit = true;
+			}
 			if(id) Lib.entities[id] = o;
+			if(debug._indexCountInit) {
+				var objects = Lib.canvases[o._index].objects;
+				var greatestIndex = -1;
+				var greatestIndexIndex = -1;
+				var leastIndex = -1;
+				var leasrIndexIndex
+				for(var i=0;i<objects.length;i++){
+					if(objects[i].index && leastIndex == -1) {
+						leastIndexIndex = objects.indexOf(objects[i]);
+						leastIndex = objects[i].index;
+					}
+					if(objects[i].index && objects[i].index >= greatestIndex) {
+						greatestIndexIndex = objects.indexOf(objects[i]);
+						greatestIndex = objects[i].index;
+					}
+				}
+				if(o.index) {
+					if(o.index >= greatestIndex) {
+						Lib.canvases[o._index].objects.push(o);
+					} else {
+						if(o.index <= leastIndex) {
+							Lib.canvases[o._index].objects.splice(leastIndexIndex,0,o);
+						} else {
+							var __idx = null;
+							for(var i=leastIndexIndex;i<greatestIndexIndex;i++) {
+								if(o.index > objects[i].index && __idx == null) {
+									__idx = o.index;
+								}
+							}
+							Lib.canvases[o._index].objects.splice(__idx+1,0,o);
+						}
+					}
+				} else {
+					Lib.canvases[o._index].objects.splice(leastIndexIndex,0,o);
+				}
+			} else {
+				Lib.canvases[o._index].objects.push(o);
+			}
 			Lib.objects.push(o);
-			Lib.canvases[o._index].objects.push(o);
+		},
+		emit:function(e,args) {
+			args = args || [];
+			if(!(args instanceof Array)) args = [args];
+			if(!Lib.customevents[e]) Lib.customevents[e] = [];
+			for(var i=0;i<Lib.customevents[e].length;i++) {
+				Lib.customevents[e][i].apply(Lib,args);
+			}
+		},
+		on:function(e,fn) {
+			if(!Lib.customevents[e]) Lib.customevents[e] = [];
+			if(typeof fn == 'function') Lib.customevents[e].push(fn);
+			else throw 'The second parameter for this method must be a function.';
 		},
 		getCanvas:function() {
 			return Lib.canvas;
@@ -394,6 +458,9 @@ var Lib = {
 		},
 		load:function(a) {
 			Lib.readyEvents.push(a);
+		},
+		log:function(a) {
+			if(debug.log) console.log(a);
 		},
 		logfps:function() {
 			if(!debug._mainCalled) console.log("WARNING: To conserve resources, no frames will be logged until objects are added to the canvas.");
@@ -663,6 +730,7 @@ var Lib = {
 			var pendingObject = {
 				_index:Lib.canvases.length-1,
 				id:Lib.id,
+				index:settings.index,
 				x:settings.x,
 				y:settings.y,
 				size:settings.size,
@@ -671,7 +739,8 @@ var Lib = {
 				image:new Image(),
 				canvas:Lib.canvas,
 				ctx:Lib.canvas.getContext("2d"),
-				sprite:null,
+				spritesheet:null,
+				renderings:[]
 			};
 			var methods = {};
 			for(var i in Lib.sharedEvents) {
@@ -823,12 +892,17 @@ function render() {
 			ctx.save();
 			ctx.translate(xpos,ypos);
 			if(Lib.canvases[i].objects[x].settings.type == "sprite") {
-				if(!Lib.canvases[i].objects[x].isHidden) Lib.canvases[i].objects[x].spritesheet.render(ctx);
+				if(!Lib.canvases[i].objects[x].isHidden) {
+					Lib.canvases[i].objects[x].spritesheet.render(ctx);
+					Lib.canvases[i].objects[x].renderings.forEach(function(rendering) {
+						rendering.call(Lib.canvases[i].objects[x],ctx,xpos,ypos);
+					});
+				}
 			} else if(!Lib.canvases[i].objects[x].isHidden) Lib.canvases[i].objects[x].render(ctx);
-			ctx.restore();
 			Lib.externalRenderings.forEach(function(rendering) {
 				rendering.call(Lib,ctx);
 			});
+			ctx.restore();
 		}
 	}
 };

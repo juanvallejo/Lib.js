@@ -1,3 +1,14 @@
+var log = {
+	verbose:false,
+	out:function(a,b) {
+		var doLog = true;
+		//properties[0] = 'verbose'
+		if(typeof b == 'object' && b.properties[0] && !log.verbose) {
+			doLog = false;
+		}
+		if(doLog) console.log(a);
+	}
+};
 var def = {
 	'js':'application/javascript',
 	'html':'text/html',
@@ -61,30 +72,32 @@ var fs = require('fs'),app = require('http').createServer(function(req,res) {
 var playerdata = {};
 
 require('socket.io').listen(app,{log:false}).on('connection',function(client) {
-	console.log('client '+client.id+' connected');
+	log.out('client '+client.id+' connected');
 	rlevts[client.id] = [];
 	rlevts[client.id].push(function(input) {
 		if(input == '-r') {
 			client.emit('command',{command:'refresh'});
+		} else if(input == '-v') {
+			log.verbose = true;
 		}
 	});
 	client.emit('welcome',{id:client.id,playerdata:playerdata});
 	client.on('playerregister',function(data) {
-		console.log('registering client '+data.id);
+		log.out('registering client '+data.id);
 		playerdata[data.id] = data;
 		client.emit('playerregister',data);
 	});
 	client.on('playerdata',function(data) {
-		console.log('client '+client.id+' sent player data');
+		log.out('client '+client.id+' sent player data');
 		client.broadcast.emit('playerdata',data);
 	});
 	client.on('playerupdate',function(data) {
-		console.log('client '+data.id+' has requested update');
+		log.out('client '+data.id+' has requested update',{properties:[1]});
 		playerdata[data.id] = data.playerdata;
 		client.broadcast.emit('playerupdate',data);
 	});
 	client.on('disconnect',function() {
-		console.log('client '+client.id+' disconnected');
+		log.out('client '+client.id+' disconnected');
 		client.broadcast.emit('playerdisconnect',{id:client.id});
 		delete playerdata[client.id];
 		delete rlevts[client.id];
