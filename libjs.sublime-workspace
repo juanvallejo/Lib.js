@@ -1,0 +1,646 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "Lib.js",
+			"settings":
+			{
+				"buffer_size": 25609,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "css/styles.css",
+			"settings":
+			{
+				"buffer_size": 8880,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "TestServer.js",
+			"settings":
+			{
+				"buffer_size": 2972,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "tests/3.Multiplayer.html",
+			"settings":
+			{
+				"buffer_size": 11765,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "data/data.js",
+			"settings":
+			{
+				"buffer_size": 9320,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 67.0,
+		"selected_items":
+		[
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"Package Control: ",
+				"Package Control: List Packages"
+			],
+			[
+				"",
+				"Package Control: Add Repository"
+			],
+			[
+				"packa",
+				"Package Control: Install Package"
+			],
+			[
+				"Pack",
+				"Preferences: Browse Packages"
+			]
+		],
+		"width": 457.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"print(\"test\")",
+			"print \"test\"",
+			"1+1",
+			"import urllib.request,os,hashlib; h = '7183a2d3e96f11eeadd761d777e62404e330c659d4bb41d3bdf022e94cab3cd0'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Volumes/Tardis/Projects/git/Lib.js/tests/3.Multiplayer.html",
+		"/Volumes/Tardis/Projects/git/juanjvallejo.com/css/lib/pages/error_log",
+		"/Volumes/corybowles.com/public_html/juanjvallejo.com/error_log",
+		"/Volumes/Tardis/Projects/git/juanjvallejo.com/css/lib/error_log",
+		"/Volumes/Tardis/Projects/git/juanjvallejo.com/error_log",
+		"/Volumes/Tardis/Projects/git/juanjvallejo.com/files/assets/cacheRevision.txt",
+		"/Volumes/Tardis/Projects/git/juanjvallejo.com/css/lib/posts.php",
+		"/Volumes/Tardis/Projects/git/juanjvallejo.com/test.php",
+		"/Volumes/Tardis/Projects/git/juanjvallejo.com/css/settings.js",
+		"/Volumes/Tardis/Projects/git/juanjvallejo.com/css/styles.css",
+		"/Volumes/Tardis/Projects/git/juanjvallejo.com.backup/css/styles.css",
+		"/Volumes/Tardis/Projects/git/webwolf/canvas/webgui/js/main.js",
+		"/Volumes/Tardis/Projects/git/webwolf/canvas/webgui/index.html",
+		"/Volumes/Tardis/Projects/git/prototype/package.json",
+		"/Volumes/Tardis/Projects/git/prototype/uploads/IMG_2857.JPG",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/NodeTestServer.js",
+		"/Users/juanvallejo/Downloads/ovr_sdk_macos_0.2.5c",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/App_Resources/Android/xml/config.xml",
+		"/Volumes/Tardis/Projects/git/prototype/server.js",
+		"/Users/juanvallejo/Desktop/lambda.js",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/scripts/Player.js",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/pages/radio.html",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/styles/radio.css",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/scripts/radio.js",
+		"/Volumes/Games/SteamApps/common/GarrysMod/sourceengine/resource/gameui_hungarian.txt",
+		"/Volumes/Tardis/Projects/git/prototype/assets/js/Noisegate.js",
+		"/Volumes/Tardis/Projects/git/prototype/_home.htm",
+		"/Users/juanvallejo/Desktop/node/app.js",
+		"/Volumes/Tardis/Projects/git/prototype/_landing.htm",
+		"/Volumes/Tardis/Projects/git/prototype/_404.htm",
+		"/Volumes/Tardis/Projects/git/prototype/_landing copy.htm",
+		"/Volumes/Tardis/Projects/git/prototype/html/assets/js/Noisegate.js",
+		"/Volumes/Tardis/Projects/git/prototype/html/extras-login.htm",
+		"/Volumes/Tardis/Projects/git/prototype/html/home.htm",
+		"/Volumes/Tardis/Projects/git/prototype/html/index.htm",
+		"/Volumes/Tardis/Projects/git/prototype/html/gallery.htm",
+		"/Volumes/Tardis/.Trashes/501/index.htm",
+		"/Volumes/Tardis/Projects/git/prototype/html/form-dropzone.htm",
+		"/Users/juanvallejo/Downloads/flac.js-master/flac.js",
+		"/Volumes/Tardis/Projects/git/prototype/html/assets/js/application.js",
+		"/Volumes/Tardis/Projects/git/books/app.js",
+		"/Volumes/Tardis/Projects/git/books/package.json",
+		"/Volumes/Tardis/Projects/git/MobileNavigatorCloudServer/diy/app.py",
+		"/Users/juanvallejo/Desktop/index.html",
+		"/Volumes/Tardis/Projects/git/MobileNavigatorCloudServer/diy/hellotornado.py",
+		"/Users/juanvallejo/Documents/data/app.js",
+		"/Users/juanvallejo/Documents/app.js",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/scripts/rss/dining.js",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/scripts/rss/sports.js",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/pages/ferguson.html",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/cordova.ios.js",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/cordova.android.js",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/index.html",
+		"/Volumes/Tardis/Projects/git/Lib.js/Lib.js",
+		"/Volumes/Tardis/Projects/git/Lib.js/tests/index.html",
+		"/Volumes/Tardis/Projects/git/Lib.js/documentation.html",
+		"/Volumes/Tardis/Projects/git/Lib.js/index.html",
+		"/Volumes/Tardis/Projects/git/plain-green-tees/libjs/Lib.js",
+		"/Volumes/Tardis/Projects/git/HackU-Practice/Libjs/Lib.js",
+		"/Users/juanvallejo/Downloads/graph.pl",
+		"/Users/juanvallejo/Desktop/cs270.java",
+		"/var/folders/_x/gd1hn99927n3vb8fvxlkd5km0000gn/T/sublime-sftp-browse-1392833878/spujet/www/parsefloat.com/music/data/settings.js",
+		"/var/folders/_x/gd1hn99927n3vb8fvxlkd5km0000gn/T/sublime-sftp-browse-1392833945/spujet/www/parsefloat.com/music/data/data.js",
+		"/Users/juanvallejo/Library/Application Support/Sublime Text 3/Packages/User/sftp_servers/spujet",
+		"/Users/juanvallejo/Downloads/V.for.Vendetta[2006] DVDRip XviD MP3-RARBG/RARBG.com.txt",
+		"/Users/juanvallejo/Desktop/icenium:::https%3A%2F%2Fapp.icenium.com?LiveSyncTo",
+		"/Users/juanvallejo/Downloads/cordova-3.3.0/cordova-js/Gruntfile.js",
+		"/Volumes/Tardis/Projects/rust/helloworld.rs",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/scripts/jquery.min.js",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/scripts/kendo.mobile.min.js",
+		"/Volumes/Tardis/Projects/git/nodeword/index.html",
+		"/Users/juanvallejo/.ssh/id_rsa.pub",
+		"/Volumes/Tardis/Projects/git/Alinova-site/data.txt",
+		"/Volumes/Tardis/Projects/cs/270/PolynomialTest/PolynomialTest/src/PolynomialTest.java",
+		"/Users/juanvallejo/Desktop/jdk1.7.0_51/sample/README",
+		"/Volumes/Tardis/Projects/cs/270/PolynomialTest/src/PolynomialTest.java",
+		"/Volumes/Games/SteamApps/common/GarrysMod/sourceengine/resource/closecaption_danish.txt",
+		"/Volumes/Tardis/Projects/cs/360/CityOutline/cityOutlineTest.cpp",
+		"/Volumes/Tardis/Projects/cs/360/CityOutline/cityoutline.cpp",
+		"/Users/juanvallejo/Desktop/cityoutline.cpp",
+		"/Users/juanvallejo/Desktop/CityOutlineEdited.cpp",
+		"/Volumes/Tardis/Projects/cs/360/CityOutline/cityTest.cpp",
+		"/Volumes/NO NAME/cityOutline.cpp",
+		"/Volumes/Tardis/Projects/git/plain-green-tees/game.html",
+		"/Users/juanvallejo/Desktop/plain-green-tees/libjs/Lib.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/game.html",
+		"/Users/juanvallejo/Desktop/plain-green-tees/game/Characters/testChar.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/game/multiplayer.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/server.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/game/Worlds/testWorld.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/game/Characters/baseChar.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/game/Worlds/baseWorld.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/package.json",
+		"/Users/juanvallejo/.ssh/id_rsa",
+		"/Users/juanvallejo/Desktop/plain-green-tees/index.html",
+		"/Users/juanvallejo/Desktop/plain-green-tees/bootstrap/js/bootstrap.min.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/bootstrap/css/bootstrap.min.css",
+		"/Users/juanvallejo/Desktop/plain-green-tees/wp-content/themes/smpl_skeleton/style.css",
+		"/Users/juanvallejo/Desktop/plain-green-tees/Lib.js/data/Lib.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/index.php",
+		"/Users/juanvallejo/Desktop/plain-green-tees/wp-content/themes/smpl_skeleton/page.php",
+		"/Users/juanvallejo/Desktop/plain-green-tees/_index.html",
+		"/Users/juanvallejo/Desktop/plain-green-tees/wp-content/themes/smpl_skeleton/css/layout.css",
+		"/Users/juanvallejo/Desktop/plain-green-tees/wp-content/themes/smpl_skeleton/editor-style-rtl.css",
+		"/Users/juanvallejo/Desktop/plain-green-tees/wp-content/themes/smpl_skeleton/editor-style.css",
+		"/Users/juanvallejo/Desktop/plain-green-tees/wp-content/themes/smpl_skeleton/rtl.css",
+		"/Applications/MAMP/htdocs/wp-config.php",
+		"/private/etc/apache2/httpd.conf",
+		"/Users/juanvallejo/Desktop/plain-green-tees/game/Loading/testWorld.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/Lib.js/index.html",
+		"/Users/juanvallejo/Desktop/plain-green-tees/Libjs/data/Lib.js",
+		"/Users/juanvallejo/Desktop/plain-green-tees/Lib.js/Lib.js",
+		"/Volumes/Tardis/Projects/git/HackU-Practice/index.html",
+		"/Volumes/Tardis/Projects/cs/270/PolynomialTest.java",
+		"/Volumes/Tardis/Projects/git/xcode/test/test/test-Prefix.pch",
+		"/Users/juanvallejo/Documents/project1/helloworld.m",
+		"/Users/juanvallejo/Documents/helloworld.m",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/TornadoTestServer.py",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/index.html.orig",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/README.md",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/README.md.orig",
+		"/Volumes/Tardis/Projects/git/HackU-Practice/db_server/index.html",
+		"/Volumes/Tardis/Projects/git/HackU-Practice/db_server/server.js",
+		"/Volumes/Tardis/Projects/git/HackU-Practice/webgl/tornado_server.py",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/pages/tv-guide-name.html",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/scripts/rss/alert.js",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/styles/common-styles.css",
+		"/Volumes/Tardis/Projects/git/MobileNavigator/Navigator/scripts/common.js"
+	],
+	"find":
+	{
+		"height": 38.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"15",
+			"chatSpecialKeys",
+			"window.",
+			"load:function",
+			"firstIndex",
+			"addobject(",
+			"objects.push",
+			"function render",
+			"sprite:func",
+			"loadedSceneVerBot",
+			"loadedSceneVerTop",
+			"loadedSceneHorLeft",
+			"loadedSceneHorBot",
+			"loadedSceneHorTop",
+			"tSize",
+			"on:function",
+			".render",
+			"renderings",
+			"render:",
+			"socket",
+			"background:transparent",
+			"head",
+			"'end'",
+			".request.post",
+			"exec",
+			".alert(",
+			"alert(",
+			"alert",
+			"if(",
+			".volume",
+			"session_client_d",
+			"signout",
+			"backend",
+			"404",
+			"dir",
+			"service.",
+			"global",
+			"service.database",
+			".post",
+			"avant",
+			"OPENSHIFT",
+			"shit",
+			"detach",
+			"////--",
+			"////-",
+			"potatopi",
+			"////--",
+			"pause:",
+			"pauseIcon",
+			"playIcon",
+			"pauseIcon",
+			".media",
+			"to_string(",
+			"////--",
+			"outline(",
+			"////--",
+			"///",
+			"////",
+			"case ",
+			"////--",
+			"sortedoutlines",
+			"res->",
+			"////--",
+			"addEventLis",
+			"addeve",
+			"addEventL",
+			"events:",
+			"click:",
+			"Lib.keys[",
+			"home",
+			"game",
+			"test",
+			"playerName",
+			"getx",
+			"console.log",
+			"size[",
+			"scale",
+			"sprite:",
+			"footer",
+			".menu",
+			"menu",
+			"comments",
+			"loadmodule",
+			"scale",
+			"sprite:",
+			"render",
+			"click to a",
+			"console.log",
+			"pauseIcon",
+			"pause",
+			"seeker",
+			"buffer",
+			"seeker",
+			"console.log(",
+			"test",
+			"print",
+			"96",
+			"<div id=\"rewind\" class=\"radio-content-controls-modal\">\n					<img src=\"\" alt=\"\"/>\n				</div><!--.rewind-->",
+			"        		<",
+			"exPlay",
+			"render()",
+			"controls",
+			"light",
+			"}",
+			"shaderpro",
+			"text",
+			"size",
+			"sizeofite",
+			"vertexShader",
+			"mvMatrix",
+			"\"d",
+			"});\n",
+			"ext",
+			"background-colo",
+			"pdf:",
+			"displayHeight",
+			"pdf()",
+			"innerHTML",
+			"displaypdf",
+			"overl",
+			"sportsFeed",
+			"click",
+			"socket",
+			"main()",
+			"tab",
+			"//",
+			"/*",
+			"speed"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"server",
+			"icon.PAUSE",
+			"icon.PLAY",
+			"to_str("
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 3,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "Lib.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 25609,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								24801,
+								24801
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 13923.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "css/styles.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 8880,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/CSS/CSS.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 4,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "TestServer.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2972,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2961,
+								2961
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 974.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "tests/3.Multiplayer.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 11765,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								9968,
+								9968
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/HTML/HTML.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 5089.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "data/data.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 9320,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"incomplete_sync": null,
+							"remote_loading": false,
+							"synced": false,
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 24.0
+	},
+	"input":
+	{
+		"height": 36.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 104.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.sftp":
+	{
+		"height": 104.0
+	},
+	"project": "libjs.sublime-project",
+	"replace":
+	{
+		"height": 72.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

@@ -359,9 +359,6 @@ var Lib = {
 		addInputRule:function(a) {
 			Lib.inputRules.push(a);
 		},
-		addCustomObject:function(a) {
-			Lib.externalRenderings.push(a);
-		},
 		addObject:function(o,id) {
 			if(!debug._indexCountInit && o.index) {
 				if(o.index < -1) throw "Invalid index value. Must be at least -1.";
@@ -468,6 +465,9 @@ var Lib = {
 		},
 		pause:function() {
 			debug._paused = true;
+		},
+		render:function(a) {
+			Lib.externalRenderings.push(a);
 		},
 		reset:function() {
 			debug._reset = true;
@@ -899,11 +899,11 @@ function render() {
 					});
 				}
 			} else if(!Lib.canvases[i].objects[x].isHidden) Lib.canvases[i].objects[x].render(ctx);
-			Lib.externalRenderings.forEach(function(rendering) {
-				rendering.call(Lib,ctx);
-			});
 			ctx.restore();
 		}
+		Lib.externalRenderings.forEach(function(rendering) {
+			rendering.call(Lib,ctx);
+		});
 	}
 };
 function lib(a) {

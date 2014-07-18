@@ -19,6 +19,32 @@ background:#2d2d2d;
 <canvas></canvas><!--#demo-->
 <script>
 console.clear();
+//load log console info
+var logs = [];
+var logLimit = 5;
+var logTimeout = 10000;
+var logInputText = [];
+//chat event vars
+var chatMode = false;
+var chatAllowedKeys = [32,188,186,187,189,190,191,222];
+var chatSpecialKeys = {
+	186:';',
+	187:'=',
+	188:',',
+	189:'-',
+	190:'.',
+	191:'/',
+	222:"'"
+};
+var chatSpecialKeysShift = {
+	186:':',
+	187:'+',
+	188:'<',
+	189:'_',
+	190:'>',
+	191:'?',
+	222:'"'
+}
 //loadedscenetest
 var sceneLoaded = false;
 var sceneTileSize = 320;
@@ -26,8 +52,11 @@ var sceneMaxTileLoad = 5;
 var loadedSceneTiles = 0;
 var loadedSceneHorTop = 0;
 var loadedSceneHorBot = 0;
+var loadedSceneHorBotN = 0;
 var loadedSceneVerLeft = 0;
+var loadedSceneVerLeftN = 0;
 var loadedSceneVerRight = 0;
+var loadedSceneBlockMod = 0;
 //end loadedscenetest
 var id;
 var animationTimeout = {};
@@ -45,6 +74,7 @@ for(var i=0;i<canvas.length;i++) {
 }
 Lib.setCanvas(canvas[0],{resize:true});
 
+initEvents();
 drawScene();
 server.on('welcome',function(data) {
 	id = data.id;
@@ -55,7 +85,7 @@ server.on('welcome',function(data) {
 		index:1,
 		position:[0,200],
 		size:[50,100],
-		speed:120,
+		speed:420,
 		src:'/graphics/guy2.png',
 		x:'center',
 		y:'center'
@@ -74,54 +104,73 @@ server.on('playerregister',function(data) {
 		var player = Lib(id);
 		player.stopAnimation();
 		player.detach();
+		Lib.render(function(ctx) {
+			//start player coordinate logging
+			ctx.font = "14px Source Code Pro";
+			ctx.fillStyle = "white";
+			ctx.fillText((Math.round(player.getDetachedX()*100)/100)+' x '+Math.round((player.getDetachedY()*100)/100),10,20);
+			//start logs
+			logs.forEach(function(l,i) {
+				ctx.fillText(l,10,(Lib.getCanvas().height/2+(i*20)));
+			});
+			if(logInputText.length) {
+				var userInput = logInputText.join('');
+				ctx.fillText(userInput,10,(Lib.getCanvas().height/2+(logs.length*20)));
+			}
+		});
 		player.render(function(ctx,x,y) {
 			var tagSize = ctx.measureText(id);
-			ctx.font = "14px Georgia";
+			ctx.font = "14px Source Code Pro";
 			ctx.fillStyle = "white";
 			ctx.fillText(id,-this.getWidth() * 1.2,-this.getHeight() / 4);
+			ctx.strokeStyle = "black";
+			ctx.lineWidth = 0.15;
+			ctx.strokeText(id,-this.getWidth() * 1.2,-this.getHeight() / 4);
 		});
 		Lib.addInputRule(function() {
-			if(Lib.hasInputKey(68)) {
-				// if(player.getX() + player.getWidth() >= Lib.getCanvas().width) player.increaseOffsetX();
-				// else player.increaseX();
-				player.setSpriteX(0);
-				player.setSpriteY(100);
-				player.reverseAnimation(false);
-				player.increaseOffsetX();
-				emitPlayerData(player);
-			}
-			if(Lib.hasInputKey(65)) {
-				// if(player.getX() <= 0) player.decreaseOffsetX();
-				// else player.decreaseX();
-				player.setSpriteY(0);
-				player.setSpriteX(0);
-				player.reverseAnimation(true);
-				player.decreaseOffsetX();
-				emitPlayerData(player);
-			}
-			if(Lib.hasInputKey(83)) {
-				// if(player.getY() + player.getHeight() > Lib.getCanvas().height) player.increaseOffsetY();
-				// else player.increaseY();
-				player.setSpriteX(0);
-				player.setSpriteY(200);
-				player.reverseAnimation(false);
-				player.increaseOffsetY();
-				emitPlayerData(player);
-			}
-			if(Lib.hasInputKey(87)) {
-				// if(player.getY() <= 0) player.decreaseOffsetY();
-				// else player.decreaseY();
-				player.setSpriteX(0);
-				player.setSpriteY(300);
-				player.reverseAnimation(false);
-				player.decreaseOffsetY();
-				emitPlayerData(player);
-			}
-			if(Lib.hasInput() && (Lib.hasInputKey(68) || Lib.hasInputKey(65) || Lib.hasInputKey(83) || Lib.hasInputKey(87) || Lib.hasInputKey(32))) {
-				player.resumeAnimation();
-				if(sceneLoaded) Lib.emit('move',[player]);
-			} else {
-				player.stopAnimation();
+			if(!chatMode) {
+				if(Lib.hasInputKey(68)) {
+					// if(player.getX() + player.getWidth() >= Lib.getCanvas().width) player.increaseOffsetX();
+					// else player.increaseX();
+					player.setSpriteX(0);
+					player.setSpriteY(100);
+					player.reverseAnimation(false);
+					player.increaseOffsetX();
+					emitPlayerData(player);
+				}
+				if(Lib.hasInputKey(65)) {
+					// if(player.getX() <= 0) player.decreaseOffsetX();
+					// else player.decreaseX();
+					player.setSpriteY(0);
+					player.setSpriteX(0);
+					player.reverseAnimation(true);
+					player.decreaseOffsetX();
+					emitPlayerData(player);
+				}
+				if(Lib.hasInputKey(83)) {
+					// if(player.getY() + player.getHeight() > Lib.getCanvas().height) player.increaseOffsetY();
+					// else player.increaseY();
+					player.setSpriteX(0);
+					player.setSpriteY(200);
+					player.reverseAnimation(false);
+					player.increaseOffsetY();
+					emitPlayerData(player);
+				}
+				if(Lib.hasInputKey(87)) {
+					// if(player.getY() <= 0) player.decreaseOffsetY();
+					// else player.decreaseY();
+					player.setSpriteX(0);
+					player.setSpriteY(300);
+					player.reverseAnimation(false);
+					player.decreaseOffsetY();
+					emitPlayerData(player);
+				}
+				if(Lib.hasInput() && (Lib.hasInputKey(68) || Lib.hasInputKey(65) || Lib.hasInputKey(83) || Lib.hasInputKey(87) || Lib.hasInputKey(32))) {
+					player.resumeAnimation();
+					if(sceneLoaded) Lib.emit('move',[player]);
+				} else {
+					player.stopAnimation();
+				}
 			}
 		});
 
@@ -165,7 +214,31 @@ server.on('command',function(data) {
 		window.location.reload();
 	}
 });
+server.on('chatmessage',function(data) {
+	var sender = '> '+data.sender+': ';
+	if(data.message.indexOf('\n') != -1) {
+		var m = data.message.split('\n');
+		log(sender+m[0]);
+		for(var i=1;i<m.length;i++) {
+			log(m[i]);
+		}
+	} else {
+		log(sender+data.message);
+	}
+});
 
+function log(text) {
+	logs.push(text);
+	if(logs.length > logLimit) logs.splice(0,1);
+	if(log.timeout) clearTimeout(log.timeout);
+	if(!log.cleanupTimeout) log.cleanupTimeout = (function cleanupTimeout() {
+		if(log.timeout) clearTimeout(log.timeout);
+		log.timeout = setTimeout(function() {
+			if(logs.length) logs.splice(0,1);
+			cleanupTimeout.call();
+		},logTimeout);
+	})();
+}
 function renderPlayer(data,callback) {
 	Lib.log('rendering player from data. ID '+data.id);
 	Lib(data.id).sprite(data);
@@ -186,7 +259,7 @@ function updatePlayer(data) {
 	clearTimeout(animationTimeout[player.getID()]);
 	animationTimeout[player.getID()] = setTimeout(function() {
 		player.stopAnimation();
-	},15);
+	},1000/60);
 }
 function emitPlayerData(player) {
 	Lib.log('Emitting player data for client '+player.getID());
@@ -237,6 +310,7 @@ function updateScene(player) {
 		//load tiles to the vertical left
 		sceneLoaded = false;
 		loadedSceneVerLeft -= sceneTileSize;
+		loadedSceneVerLeftN++;
 		for(var i=0;i<sceneMaxTileLoad;i++) {
 			Lib('scene-grass'+loadedSceneTiles).sprite({
 				src:'/graphics/tiles.png',
@@ -271,6 +345,128 @@ function updateScene(player) {
 			sceneLoaded = true;
 		});
 	}
+	if(player.getOffsetY()+player.getY()+player.getHeight() >= (loadedSceneHorBot+loadedSceneHorTop) && sceneLoaded) {
+		//load tiles to the horizontal bottom
+		sceneLoaded = false;
+		//calculate gaps in map due to previous loading -- when map loaded from top_left, origin moves causing jagged loading on bottom
+		var gapModifierX = Math.max(0,(Math.abs((loadedSceneVerLeft / sceneTileSize))-loadedSceneHorBotN));
+		var gapModifierY = Math.max(0,(Math.abs(loadedSceneHorTop / sceneTileSize)-loadedSceneHorBotN));
+		log('<gapModifierX> '+gapModifierX);
+		log('<gapModifierY> '+gapModifierY);
+		if(gapModifierX == gapModifierY) {
+			if(gapModifierX == 0) {
+				//if ground is evenly loaded on bottom, load bottom as horizontal strips
+				log('loading bottom using block loading method 1');
+				for(var i=0;i<sceneMaxTileLoad;i++) {
+					Lib('scene-grass'+loadedSceneTiles).sprite({
+						src:'/graphics/tiles.png',
+						size:[sceneTileSize,sceneTileSize],
+						position:[0,0],
+						frames:[0],
+						x:(sceneTileSize*i)+loadedSceneVerLeft,
+						y:loadedSceneHorBot
+					});
+					loadedSceneTiles++;
+				}
+				loadedSceneBlockMod = 0;
+			} else {
+				//load missing chunks by filling in gaps in increments -- escalator design in missing blocks
+				loadedSceneBlockMod++;
+				loadedSceneHorBot -= (sceneTileSize*loadedSceneBlockMod);
+				log('loading bottom using block loading method 2');
+				for(var i=0;i<loadedSceneBlockMod;i++) {
+					Lib('scene-grass'+loadedSceneTiles).sprite({
+						src:'/graphics/tiles.png',
+						size:[sceneTileSize,sceneTileSize],
+						position:[0,0],
+						frames:[0],
+						x:(sceneTileSize*i)+loadedSceneVerLeft,
+						y:loadedSceneHorBot
+					});
+					loadedSceneTiles++;
+				}
+			}
+		} else {
+			if(gapModifierY == 0) {
+				//load normally
+			} else if(gapModifierX > gapModifierY) {
+				//more left has been loaded than top
+				//load missing chunks by filling in gaps in increments
+				log('loading bottom using block loading method 3');
+			} else {
+				//more top has been loaded than left
+				//load missing chunks one at a time
+				log('loading bottom using block loading method 4');
+			}
+			//update map data
+			loadedSceneHorBot += sceneTileSize;
+		}
+		//update map data
+		loadedSceneHorBot += sceneTileSize;
+		loadedSceneHorBotN++;
+		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
+			sceneLoaded = true;
+		});
+	}
+}
+function initEvents() {
+	//chat -- listen for key
+	window.addEventListener('keydown',function(key) {
+		if(key.keyCode == 8) {
+			//backspace
+			if(chatMode) {
+				if(logInputText.length > 1) {
+					logInputText.splice(logInputText.length-2,1);
+				}
+			}
+		}
+		if(key.keyCode == 27) {
+			if(chatMode) {
+				chatMode = false;
+				logInputText = [];
+			}
+		}
+		if(key.keyCode == 13) {
+			//enter
+			if(chatMode) {
+				//send message to the server
+				chatMode = false;
+				logInputText.pop();
+				if(logInputText.length) {
+					if(logInputText.length > 50) {
+						for(var i=50;i<logInputText.length;i+=50) {
+							logInputText.splice(i,0,'\n');
+						}
+					}
+					server.emit('chatmessage',{message:logInputText,sender:id});
+					logInputText = [];
+				}
+			} else {
+				chatMode = true;
+				logInputText.push('|');
+			}
+		}
+		if(key.keyCode == 82) {
+			if(!chatMode) {
+				window.location.reload();
+			}
+		}
+		if(chatMode && (chatAllowedKeys.indexOf(key.keyCode) != -1 || key.keyCode >= 48 && key.keyCode <= 90)) {
+			var k = String.fromCharCode(key.keyCode).toLowerCase();
+			if(key.shiftKey) k = chatSpecialKeysShift[key.keyCode] || k;
+			else k = chatSpecialKeys[key.keyCode] || k;
+			logInputText.pop();
+			logInputText.push(k);
+			logInputText.push('|');
+		}
+		if(key.keyCode == 84) {
+			//T key pressed
+			if(!chatMode) {
+				chatMode = true;
+				logInputText.push('|');
+			}
+		}
+	});
 }
 </script>
 </body>

@@ -102,4 +102,13 @@ require('socket.io').listen(app,{log:false}).on('connection',function(client) {
 		delete playerdata[client.id];
 		delete rlevts[client.id];
 	});
+	client.on('chatmessage',function(data) {
+		var message = data.message.join('');
+		var data = {
+			message:message,
+			sender:data.sender
+		};
+		client.emit('chatmessage',data);
+		client.broadcast.emit('chatmessage',data);
+	});
 });
