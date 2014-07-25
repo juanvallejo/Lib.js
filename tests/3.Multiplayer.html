@@ -27,6 +27,11 @@ var logInputText = [];
 //chat event vars
 var chatMode = false;
 var chatAllowedKeys = [32,188,186,187,189,190,191,222];
+var chatCommands = {
+	'setLogTimeout':function(data) {
+		log('logTimeout set to '+data[0]);
+	}
+};
 var chatSpecialKeys = {
 	186:';',
 	187:'=',
@@ -45,7 +50,7 @@ var chatSpecialKeysShift = {
 	191:'?',
 	222:'"'
 }
-//loadedscenetest
+//loaded scene
 var sceneLoaded = false;
 var sceneTileSize = 320;
 var sceneMaxTileLoad = 5;
@@ -57,8 +62,14 @@ var loadedSceneVerLeft = 0;
 var loadedSceneVerLeftN = 0;
 var loadedSceneVerRight = 0;
 var loadedSceneBlockMod = 0;
-//end loadedscenetest
+//player data
+var playerBlockLocationX = 0;
+var playerBlockLocationY = 0;
+var playerRelativeX = 0;
+var playerRelativeY = 0;
+//game data
 var id;
+var version;
 var animationTimeout = {};
 var playerTemplate;
 var playerdata;
@@ -78,6 +89,7 @@ initEvents();
 drawScene();
 server.on('welcome',function(data) {
 	id = data.id;
+	version = data.version;
 	playerdata = data.playerdata;
 	playerTemplate = {
 		frequency:13,
@@ -104,20 +116,6 @@ server.on('playerregister',function(data) {
 		var player = Lib(id);
 		player.stopAnimation();
 		player.detach();
-		Lib.render(function(ctx) {
-			//start player coordinate logging
-			ctx.font = "14px Source Code Pro";
-			ctx.fillStyle = "white";
-			ctx.fillText((Math.round(player.getDetachedX()*100)/100)+' x '+Math.round((player.getDetachedY()*100)/100),10,20);
-			//start logs
-			logs.forEach(function(l,i) {
-				ctx.fillText(l,10,(Lib.getCanvas().height/2+(i*20)));
-			});
-			if(logInputText.length) {
-				var userInput = logInputText.join('');
-				ctx.fillText(userInput,10,(Lib.getCanvas().height/2+(logs.length*20)));
-			}
-		});
 		player.render(function(ctx,x,y) {
 			var tagSize = ctx.measureText(id);
 			ctx.font = "14px Source Code Pro";
@@ -127,11 +125,27 @@ server.on('playerregister',function(data) {
 			ctx.lineWidth = 0.15;
 			ctx.strokeText(id,-this.getWidth() * 1.2,-this.getHeight() / 4);
 		});
+		Lib.render(function(ctx) {
+			//start player coordinate logging
+			ctx.font = "14px Source Code Pro";
+			ctx.fillStyle = "white";
+			ctx.fillText((Math.round(player.getDetachedX()*100)/100)+' x '+Math.round((player.getDetachedY()*100)/100),10,20);
+			ctx.fillText((Math.round(playerRelativeX*100)/100)+' x '+Math.round((playerRelativeY*100)/100),10,40);
+			//start logs
+			logs.forEach(function(l,i) {
+				ctx.fillText(l,10,(Lib.getCanvas().height/2+(i*20)));
+			});
+			if(logInputText.length) {
+				var userInput = logInputText.join('');
+				ctx.fillText(userInput,10,(Lib.getCanvas().height/2+(logs.length*20)));
+			}
+		});
 		Lib.addInputRule(function() {
 			if(!chatMode) {
 				if(Lib.hasInputKey(68)) {
 					// if(player.getX() + player.getWidth() >= Lib.getCanvas().width) player.increaseOffsetX();
 					// else player.increaseX();
+					playerRelativeX += Lib.getAnimationTime() * player.getSpeed();
 					player.setSpriteX(0);
 					player.setSpriteY(100);
 					player.reverseAnimation(false);
@@ -141,6 +155,7 @@ server.on('playerregister',function(data) {
 				if(Lib.hasInputKey(65)) {
 					// if(player.getX() <= 0) player.decreaseOffsetX();
 					// else player.decreaseX();
+					playerRelativeX -= Lib.getAnimationTime() * player.getSpeed();
 					player.setSpriteY(0);
 					player.setSpriteX(0);
 					player.reverseAnimation(true);
@@ -150,6 +165,7 @@ server.on('playerregister',function(data) {
 				if(Lib.hasInputKey(83)) {
 					// if(player.getY() + player.getHeight() > Lib.getCanvas().height) player.increaseOffsetY();
 					// else player.increaseY();
+					playerRelativeY += Lib.getAnimationTime() * player.getSpeed();
 					player.setSpriteX(0);
 					player.setSpriteY(200);
 					player.reverseAnimation(false);
@@ -159,6 +175,7 @@ server.on('playerregister',function(data) {
 				if(Lib.hasInputKey(87)) {
 					// if(player.getY() <= 0) player.decreaseOffsetY();
 					// else player.decreaseY();
+					playerRelativeY -= Lib.getAnimationTime() * player.getSpeed();
 					player.setSpriteX(0);
 					player.setSpriteY(300);
 					player.reverseAnimation(false);
@@ -302,7 +319,14 @@ function drawScene() {
 		loadedSceneVerRight = Lib('scene-grass'+(loadedSceneTiles-1)).getX()+sceneTileSize;
 	});
 	Lib.on('move',function(player) {
+		playerBlockLocationX = Math.abs(playerRelativeX) > sceneTileSize ? parseInt(Math.floor(playerRelativeX) / sceneTileSize) : 0;
+		playerBlockLocationY = Math.abs(playerRelativeX) > sceneTileSize ? parseInt(Math.floor(playerRelativeY) / sceneTileSize) : 0;
 		updateScene(player);
+	});
+	Lib.on('mapload',function(player,limit) {
+		log(loadedSceneVerRight);
+		log('last block\'s x: '+(limit.getX()+limit.getWidth())+'\n last block\'s y: '+limit.getY());
+		if(limit.getX()+limit.getWidth() < loadedSceneVerRight) log(parseInt(parseInt(loadedSceneVerRight / limit.getX()+limit.getWidth()) / sceneTileSize)+' blocks missing to the right');
 	});
 }
 function updateScene(player) {
@@ -318,12 +342,13 @@ function updateScene(player) {
 				position:[0,0],
 				frames:[0],
 				x:loadedSceneVerLeft,
-				y:(sceneTileSize*i)+loadedSceneHorTop
+				y:(sceneTileSize*i)+(playerBlockLocationY*sceneTileSize)
 			});
 			loadedSceneTiles++;
 		}
 		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
 			sceneLoaded = true;
+			Lib.emit('mapload',[player,this]);
 		});
 	}
 	if(player.getOffsetY()+player.getY() <= loadedSceneHorTop && sceneLoaded) {
@@ -336,76 +361,57 @@ function updateScene(player) {
 				size:[sceneTileSize,sceneTileSize],
 				position:[0,0],
 				frames:[0],
-				x:(sceneTileSize*i)+loadedSceneVerLeft,
+				x:(sceneTileSize*i)+(playerBlockLocationX*sceneTileSize),
 				y:loadedSceneHorTop
 			});
 			loadedSceneTiles++;
 		}
 		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
 			sceneLoaded = true;
+			Lib.emit('mapload',[player,this]);
 		});
 	}
-	if(player.getOffsetY()+player.getY()+player.getHeight() >= (loadedSceneHorBot+loadedSceneHorTop) && sceneLoaded) {
+	if(player.getOffsetY()+player.getY()+player.getHeight() >= loadedSceneHorBot && sceneLoaded) {
 		//load tiles to the horizontal bottom
 		sceneLoaded = false;
-		//calculate gaps in map due to previous loading -- when map loaded from top_left, origin moves causing jagged loading on bottom
-		var gapModifierX = Math.max(0,(Math.abs((loadedSceneVerLeft / sceneTileSize))-loadedSceneHorBotN));
-		var gapModifierY = Math.max(0,(Math.abs(loadedSceneHorTop / sceneTileSize)-loadedSceneHorBotN));
-		log('<gapModifierX> '+gapModifierX);
-		log('<gapModifierY> '+gapModifierY);
-		if(gapModifierX == gapModifierY) {
-			if(gapModifierX == 0) {
-				//if ground is evenly loaded on bottom, load bottom as horizontal strips
-				log('loading bottom using block loading method 1');
-				for(var i=0;i<sceneMaxTileLoad;i++) {
-					Lib('scene-grass'+loadedSceneTiles).sprite({
-						src:'/graphics/tiles.png',
-						size:[sceneTileSize,sceneTileSize],
-						position:[0,0],
-						frames:[0],
-						x:(sceneTileSize*i)+loadedSceneVerLeft,
-						y:loadedSceneHorBot
-					});
-					loadedSceneTiles++;
-				}
-				loadedSceneBlockMod = 0;
-			} else {
-				//load missing chunks by filling in gaps in increments -- escalator design in missing blocks
-				loadedSceneBlockMod++;
-				loadedSceneHorBot -= (sceneTileSize*loadedSceneBlockMod);
-				log('loading bottom using block loading method 2');
-				for(var i=0;i<loadedSceneBlockMod;i++) {
-					Lib('scene-grass'+loadedSceneTiles).sprite({
-						src:'/graphics/tiles.png',
-						size:[sceneTileSize,sceneTileSize],
-						position:[0,0],
-						frames:[0],
-						x:(sceneTileSize*i)+loadedSceneVerLeft,
-						y:loadedSceneHorBot
-					});
-					loadedSceneTiles++;
-				}
-			}
-		} else {
-			if(gapModifierY == 0) {
-				//load normally
-			} else if(gapModifierX > gapModifierY) {
-				//more left has been loaded than top
-				//load missing chunks by filling in gaps in increments
-				log('loading bottom using block loading method 3');
-			} else {
-				//more top has been loaded than left
-				//load missing chunks one at a time
-				log('loading bottom using block loading method 4');
-			}
-			//update map data
-			loadedSceneHorBot += sceneTileSize;
+		//log data
+		for(var i=0;i<sceneMaxTileLoad;i++) {
+			Lib('scene-grass'+loadedSceneTiles).sprite({
+				src:'/graphics/tiles.png',
+				size:[sceneTileSize,sceneTileSize],
+				position:[0,0],
+				frames:[0],
+				x:(sceneTileSize*i)+(playerBlockLocationX * sceneTileSize),
+				y:loadedSceneHorBot
+			});
+			loadedSceneTiles++;
 		}
 		//update map data
 		loadedSceneHorBot += sceneTileSize;
 		loadedSceneHorBotN++;
 		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
 			sceneLoaded = true;
+			Lib.emit('mapload',[player,this]);
+		});
+	}
+	if(player.getOffsetX()+player.getX()+player.getWidth() >= loadedSceneVerRight && sceneLoaded) {
+		//load tiles to the vertical right
+		sceneLoaded = false;
+		for(var i=0;i<sceneMaxTileLoad;i++) {
+			Lib('scene-grass'+loadedSceneTiles).sprite({
+				src:'/graphics/tiles.png',
+				size:[sceneTileSize,sceneTileSize],
+				position:[0,0],
+				frames:[0],
+				x:loadedSceneVerRight,
+				y:(sceneTileSize*i)+(playerBlockLocationY*sceneTileSize)
+			});
+			loadedSceneTiles++;
+		}
+		loadedSceneVerRight += sceneTileSize;
+		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
+			sceneLoaded = true;
+			Lib.emit('mapload',[player,this]);
 		});
 	}
 }
@@ -433,6 +439,14 @@ function initEvents() {
 				chatMode = false;
 				logInputText.pop();
 				if(logInputText.length) {
+					if(logInputText[0] == '/') {
+						var command = chatCommands[logInputText.join('').substring(1)];
+						if(command) {
+							command.call(this,command.split(' ').splice(0,1));
+							logInputText = [];
+							return;
+						}
+					}
 					if(logInputText.length > 50) {
 						for(var i=50;i<logInputText.length;i+=50) {
 							logInputText.splice(i,0,'\n');
@@ -459,7 +473,7 @@ function initEvents() {
 			logInputText.push(k);
 			logInputText.push('|');
 		}
-		if(key.keyCode == 84) {
+		if(key.keyCode == 84 || key.keyCode == 191) {
 			//T key pressed
 			if(!chatMode) {
 				chatMode = true;

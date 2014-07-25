@@ -1,3 +1,4 @@
+var version;
 var log = {
 	verbose:false,
 	out:function(a,b) {
@@ -31,6 +32,17 @@ var readline = require('readline').createInterface({
 		});
 	}
 });
+
+var exec = require('child_process').exec;
+exec('git rev-parse HEAD',function(err,stdout,stderr) {
+	if(err) {
+		console.log('There was an error fetching git version data');
+		version = 'by Juan Vallejo';
+		return;
+	}
+	version = stdout;
+});
+
 var fs = require('fs'),app = require('http').createServer(function(req,res) {
 	var url = req.url == '/' ? '/index.html' : req.url;
 	var ext = req.url.split('.');
@@ -81,7 +93,7 @@ require('socket.io').listen(app,{log:false}).on('connection',function(client) {
 			log.verbose = true;
 		}
 	});
-	client.emit('welcome',{id:client.id,playerdata:playerdata});
+	client.emit('welcome',{id:client.id,playerdata:playerdata,version:version});
 	client.on('playerregister',function(data) {
 		log.out('registering client '+data.id);
 		playerdata[data.id] = data;

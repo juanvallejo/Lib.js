@@ -418,6 +418,9 @@ var Lib = {
 			if(typeof fn == 'function') Lib.customevents[e].push(fn);
 			else throw 'The second parameter for this method must be a function.';
 		},
+		getAnimationTime:function() {
+			return time.dt;
+		},
 		getCanvas:function() {
 			return Lib.canvas;
 		},
