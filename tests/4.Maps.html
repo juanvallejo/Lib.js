@@ -2,7 +2,7 @@
 <html lang="en-us">
 <head>
 <meta charset="utf-8"/>
-    <title>Lib.js multiplayer</title>
+    <title>Lib.js maps</title>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/data/data.js"></script>
 <script src="/Lib.js"></script>
@@ -62,6 +62,22 @@ var loadedSceneVerLeft = 0;
 var loadedSceneVerLeftN = 0;
 var loadedSceneVerRight = 0;
 var loadedSceneBlockMod = 0;
+//map data
+var mapdata = {
+	_enabled:true,
+	_entities:[],
+	addEntity:function(name,x,y,kind,collides) {
+		typeof id == 'object' ? _entities.push(id) : _entities.push({
+			id:_entities.length,
+			name:name,
+			kind:kind,
+			collides:collides,
+			entity:Lib('mapent.'+name+_entities.length
+		});
+	}
+};
+//add data to map
+mapdata.addEntity('house',0,0,0,1);
 //player data
 var playerBlockLocationX = 0;
 var playerBlockLocationY = 0;
