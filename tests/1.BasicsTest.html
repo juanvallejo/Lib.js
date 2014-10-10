@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8"/>
+    <title>Lib.js basics demo test</title>
+<script src="/data/data.js"></script>
+<script src="/Lib.js"></script>
+<style>
+body,html {
+padding:0; margin:0;
+}
+body {
+background:#555555;
+}
+</style>
+</head>
+<body>
+<canvas></canvas><!--#demo-->
+<script>
+var canvas = document.getElementsByTagName("canvas");
+for(var i=0;i<canvas.length;i++) {
+	canvas[i].addEventListener('focus',function() {
+		Site.canvasFocused = true;
+	});
+	canvas[i].addEventListener('blur',function() {
+		Site.canvasFocused = false;
+	});
+}
+Lib.setCanvas(canvas[0],{resize:true});
+Lib('guy').sprite({
+	src:"/graphics/guy2.png",
+	size:[50,100],
+	position:[0,200],
+	speed:120,
+	frequency:13,
+	x:'center',
+	y:'center'
+});
+Lib.load(function() {
+	Lib.addInputRule(function() {
+		var obj = Lib("guy");
+		Lib.stopAnimation(canvas[1]);
+		if(Lib.hasInputKey(39)) {
+			if(obj.getX() >= Lib.getCanvas().width) obj.setX(-obj.getWidth());
+			obj.setSpriteX(0);
+			obj.setSpriteY(100);
+			obj.reverseAnimation(false);
+			obj.increaseX();
+		}
+		if(Lib.hasInputKey(37)) {
+			if(obj.getX() + obj.getWidth() <= 0) obj.setX(Lib.getCanvas().width);
+			obj.setSpriteY(0);
+			obj.setSpriteX(0);
+			obj.reverseAnimation(true);
+			obj.decreaseX();
+		}
+		if(Lib.hasInputKey(40)) {
+			if(obj.getY() >= Lib.getCanvas().height) obj.setY(-obj.getHeight());
+			obj.setSpriteX(0);
+			obj.setSpriteY(200);
+			obj.reverseAnimation(false);
+			obj.increaseY();
+		}
+		if(Lib.hasInputKey(38)) {
+			if(obj.getY() + obj.getHeight() <= 0) obj.setY(Lib.getCanvas().height);
+			obj.setSpriteX(0);
+			obj.setSpriteY(300);
+			obj.reverseAnimation(false);
+			obj.decreaseY();
+		}
+		if(Lib.hasInput() && (Lib.hasInputKey(39) || Lib.hasInputKey(37) || Lib.hasInputKey(40) || Lib.hasInputKey(38) || Lib.hasInputKey(32))) obj.resumeAnimation();
+		else obj.stopAnimation();
+	});
+});
+</script>
+</body>
+</html>

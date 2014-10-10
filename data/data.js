@@ -13,6 +13,7 @@ var Site = {
 		return html;
 	},
 	manageMenuLabels:function() {
+		if(!document.getElementById("menu")) return;
 		var arr = document.getElementById("menu").children[0].children;
 		var li = [];
 		for(var i=0;i<arr.length;i++) {

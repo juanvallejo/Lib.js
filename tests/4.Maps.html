@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8"/>
+    <title>Lib.js maps</title>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/data/data.js"></script>
+<script src="/Lib.js"></script>
+<style>
+body,html {
+padding:0; margin:0;
+}
+body {
+background:#2d2d2d;
+}
+</style>
+</head>
+<body>
+<canvas></canvas><!--#demo-->
+<script>
+console.clear();
+//load log console info
+var logs = [];
+var logLimit = 5;
+var logTimeout = 10000;
+var logInputText = [];
+//chat event vars
+var chatMode = false;
+var chatAllowedKeys = [32,188,186,187,189,190,191,222];
+var chatCommands = {
+	'setLogTimeout':function(data) {
+		log('logTimeout set to '+data[0]);
+	}
+};
+var chatSpecialKeys = {
+	186:';',
+	187:'=',
+	188:',',
+	189:'-',
+	190:'.',
+	191:'/',
+	222:"'"
+};
+var chatSpecialKeysShift = {
+	186:':',
+	187:'+',
+	188:'<',
+	189:'_',
+	190:'>',
+	191:'?',
+	222:'"'
+}
+//loaded scene
+var sceneLoaded = false;
+var sceneTileSize = 320;
+var sceneMaxTileLoad = 5;
+var loadedSceneTiles = 0;
+var loadedSceneHorTop = 0;
+var loadedSceneHorBot = 0;
+var loadedSceneHorBotN = 0;
+var loadedSceneVerLeft = 0;
+var loadedSceneVerLeftN = 0;
+var loadedSceneVerRight = 0;
+var loadedSceneBlockMod = 0;
+//map data
+var mapdata = {
+	_enabled:true,
+	_entities:[],
+	addEntity:function(name,x,y,kind,collides) {
+		typeof id == 'object' ? _entities.push(id) : _entities.push({
+			id:_entities.length,
+			name:name,
+			kind:kind,
+			collides:collides,
+			entity:Lib('mapent.'+name+_entities.length
+		});
+	}
+};
+//add data to map
+mapdata.addEntity('house',0,0,0,1);
+//player data
+var playerBlockLocationX = 0;
+var playerBlockLocationY = 0;
+var playerRelativeX = 0;
+var playerRelativeY = 0;
+//game data
+var id;
+var version;
+var animationTimeout = {};
+var playerTemplate;
+var playerdata;
+var canvas = document.getElementsByTagName("canvas");
+var server = io.connect('http://'+window.location.hostname);
+for(var i=0;i<canvas.length;i++) {
+	canvas[i].addEventListener('focus',function() {
+		Site.canvasFocused = true;
+	});
+	canvas[i].addEventListener('blur',function() {
+		Site.canvasFocused = false;
+	});
+}
+Lib.setCanvas(canvas[0],{resize:true});
+
+initEvents();
+drawScene();
+server.on('welcome',function(data) {
+	id = data.id;
+	version = data.version;
+	playerdata = data.playerdata;
+	playerTemplate = {
+		frequency:13,
+		id:data.id,
+		index:1,
+		position:[0,200],
+		size:[50,100],
+		speed:420,
+		src:'/graphics/guy2.png',
+		x:'center',
+		y:'center'
+	};
+	Lib.log(data.playerdata);
+	Lib.log('Server connection established. Client id '+id);
+
+	server.emit('playerdata',playerTemplate);
+	server.emit('playerregister',playerTemplate);
+});
+server.on('playerregister',function(data) {
+	Lib.log('main player has been registered with the server. You may now render it. ID '+data.id);
+	Lib(id).sprite(data);
+	Lib(id).load(function() {
+		Lib.log('Main character sprite has loaded. Using ID '+id+' to render.');
+		var player = Lib(id);
+		player.stopAnimation();
+		player.detach();
+		player.render(function(ctx,x,y) {
+			var tagSize = ctx.measureText(id);
+			ctx.font = "14px Source Code Pro";
+			ctx.fillStyle = "white";
+			ctx.fillText(id,-this.getWidth() * 1.2,-this.getHeight() / 4);
+			ctx.strokeStyle = "black";
+			ctx.lineWidth = 0.15;
+			ctx.strokeText(id,-this.getWidth() * 1.2,-this.getHeight() / 4);
+		});
+		Lib.render(function(ctx) {
+			//start player coordinate logging
+			ctx.font = "14px Source Code Pro";
+			ctx.fillStyle = "white";
+			ctx.fillText((Math.round(player.getDetachedX()*100)/100)+' x '+Math.round((player.getDetachedY()*100)/100),10,20);
+			ctx.fillText((Math.round(playerRelativeX*100)/100)+' x '+Math.round((playerRelativeY*100)/100),10,40);
+			//start logs
+			logs.forEach(function(l,i) {
+				ctx.fillText(l,10,(Lib.getCanvas().height/2+(i*20)));
+			});
+			if(logInputText.length) {
+				var userInput = logInputText.join('');
+				ctx.fillText(userInput,10,(Lib.getCanvas().height/2+(logs.length*20)));
+			}
+		});
+		Lib.addInputRule(function() {
+			if(!chatMode) {
+				if(Lib.hasInputKey(68)) {
+					// if(player.getX() + player.getWidth() >= Lib.getCanvas().width) player.increaseOffsetX();
+					// else player.increaseX();
+					playerRelativeX += Lib.getAnimationTime() * player.getSpeed();
+					player.setSpriteX(0);
+					player.setSpriteY(100);
+					player.reverseAnimation(false);
+					player.increaseOffsetX();
+					emitPlayerData(player);
+				}
+				if(Lib.hasInputKey(65)) {
+					// if(player.getX() <= 0) player.decreaseOffsetX();
+					// else player.decreaseX();
+					playerRelativeX -= Lib.getAnimationTime() * player.getSpeed();
+					player.setSpriteY(0);
+					player.setSpriteX(0);
+					player.reverseAnimation(true);
+					player.decreaseOffsetX();
+					emitPlayerData(player);
+				}
+				if(Lib.hasInputKey(83)) {
+					// if(player.getY() + player.getHeight() > Lib.getCanvas().height) player.increaseOffsetY();
+					// else player.increaseY();
+					playerRelativeY += Lib.getAnimationTime() * player.getSpeed();
+					player.setSpriteX(0);
+					player.setSpriteY(200);
+					player.reverseAnimation(false);
+					player.increaseOffsetY();
+					emitPlayerData(player);
+				}
+				if(Lib.hasInputKey(87)) {
+					// if(player.getY() <= 0) player.decreaseOffsetY();
+					// else player.decreaseY();
+					playerRelativeY -= Lib.getAnimationTime() * player.getSpeed();
+					player.setSpriteX(0);
+					player.setSpriteY(300);
+					player.reverseAnimation(false);
+					player.decreaseOffsetY();
+					emitPlayerData(player);
+				}
+				if(Lib.hasInput() && (Lib.hasInputKey(68) || Lib.hasInputKey(65) || Lib.hasInputKey(83) || Lib.hasInputKey(87) || Lib.hasInputKey(32))) {
+					player.resumeAnimation();
+					if(sceneLoaded) Lib.emit('move',[player]);
+				} else {
+					player.stopAnimation();
+				}
+			}
+		});
+
+		for(var i in playerdata) {
+			renderPlayer(playerdata[i],function(player) {
+				player.render(function(ctx,x,y) {
+					var tagSize = ctx.measureText(player.getID());
+					ctx.font = "14px Georgia";
+					ctx.fillStyle = "white";
+					ctx.fillText(player.getID(),-this.getWidth() * 1.2,-this.getHeight() / 4);
+				});
+			});
+		}
+	});
+});
+server.on('playerdata',function(data) {
+	Lib.log('playerdata received for client '+data.id+'... drawing client');
+	renderPlayer(data,function(player) {
+		player.render(function(ctx,x,y) {
+			var tagSize = ctx.measureText(player.getID());
+			ctx.font = "14px Georgia";
+			ctx.fillStyle = "white";
+			ctx.fillText(player.getID(),-this.getWidth() * 1.2,-this.getHeight() / 4);
+		});
+	});
+});
+server.on('playerdisconnect',function(data) {
+	Lib.log(data.id+' has disconnected');
+	if(Lib(data.id) && Lib(data.id).hide) Lib(data.id).hide();
+	else Lib.log('Player '+data.id+' does not exist.');
+});
+server.on('message',function(data) {
+	Lib.log(data.message);
+});
+server.on('playerupdate',function(data) {
+	Lib.log('playerupdate requested for client '+data.id);
+	updatePlayer(data);
+});
+server.on('command',function(data) {
+	if(data.command == 'refresh') {
+		window.location.reload();
+	}
+});
+server.on('chatmessage',function(data) {
+	var sender = '> '+data.sender+': ';
+	if(data.message.indexOf('\n') != -1) {
+		var m = data.message.split('\n');
+		log(sender+m[0]);
+		for(var i=1;i<m.length;i++) {
+			log(m[i]);
+		}
+	} else {
+		log(sender+data.message);
+	}
+});
+
+function log(text) {
+	logs.push(text);
+	if(logs.length > logLimit) logs.splice(0,1);
+	if(log.timeout) clearTimeout(log.timeout);
+	if(!log.cleanupTimeout) log.cleanupTimeout = (function cleanupTimeout() {
+		if(log.timeout) clearTimeout(log.timeout);
+		log.timeout = setTimeout(function() {
+			if(logs.length) logs.splice(0,1);
+			cleanupTimeout.call();
+		},logTimeout);
+	})();
+}
+function renderPlayer(data,callback) {
+	Lib.log('rendering player from data. ID '+data.id);
+	Lib(data.id).sprite(data);
+	Lib(data.id).load(function() {
+		Lib(this.getID()).stopAnimation();
+		if(typeof callback == 'function') callback.call(this,Lib(this.getID()));
+	});
+}
+function updatePlayer(data) {
+	Lib.log('updating data for client '+data.id);
+	var player = Lib(data.id);
+	player.resumeAnimation();
+	player.setY(data.playerdata.y);
+	player.setX(data.playerdata.x);
+	player.setSpriteX(data.playerdata.position[0]);
+	player.setSpriteY(data.playerdata.position[1]);
+	player.reverseAnimation(data.playerdata.reverse);
+	clearTimeout(animationTimeout[player.getID()]);
+	animationTimeout[player.getID()] = setTimeout(function() {
+		player.stopAnimation();
+	},1000/60);
+}
+function emitPlayerData(player) {
+	Lib.log('Emitting player data for client '+player.getID());
+	server.emit('playerupdate',{
+		id:player.getID(),
+		playerdata:{
+			'id':player.getID(),
+			'kind':'sprite',
+			'src':'/graphics/guy2.png',
+			'index':player.getIndex(),
+			'size':player.getSize(),
+			'position':player.getPosition(),
+			'speed':player.getSpeed(),
+			'frequency':player.getFrequency(),
+			'x':player.getX()+player.getOffsetX(),
+			'y':player.getY()+player.getOffsetY(),
+			'displayid':true,
+			'reverse':player.getAnimationStatus()
+		}
+	});
+}
+function drawScene() {
+	var sceneMaxTileLoad = Math.ceil(Lib.getCanvas().width / sceneTileSize);
+	for(var x=0;x<sceneMaxTileLoad;x++) {
+		for(var y=0;y<sceneMaxTileLoad;y++) {
+			Lib('scene-grass'+loadedSceneTiles).sprite({
+				src:'/graphics/tiles.png',
+				size:[sceneTileSize,sceneTileSize],
+				position:[0,0],
+				frames:[0],
+				x:sceneTileSize*x,
+				y:sceneTileSize*y
+			});
+			loadedSceneTiles++;
+		}
+	}
+	Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
+		sceneLoaded = true;
+		loadedSceneHorBot = Lib('scene-grass'+(loadedSceneTiles-1)).getY()+sceneTileSize;
+		loadedSceneVerRight = Lib('scene-grass'+(loadedSceneTiles-1)).getX()+sceneTileSize;
+	});
+	Lib.on('move',function(player) {
+		playerBlockLocationX = Math.abs(playerRelativeX) > sceneTileSize ? parseInt(Math.floor(playerRelativeX) / sceneTileSize) : 0;
+		playerBlockLocationY = Math.abs(playerRelativeX) > sceneTileSize ? parseInt(Math.floor(playerRelativeY) / sceneTileSize) : 0;
+		updateScene(player);
+	});
+	Lib.on('mapload',function(player,limit) {
+		log(loadedSceneVerRight);
+		log('last block\'s x: '+(limit.getX()+limit.getWidth())+'\n last block\'s y: '+limit.getY());
+		if(limit.getX()+limit.getWidth() < loadedSceneVerRight) log(parseInt(parseInt(loadedSceneVerRight / limit.getX()+limit.getWidth()) / sceneTileSize)+' blocks missing to the right');
+	});
+}
+function updateScene(player) {
+	if(player.getOffsetX()+player.getX() <= loadedSceneVerLeft && sceneLoaded) {
+		//load tiles to the vertical left
+		sceneLoaded = false;
+		loadedSceneVerLeft -= sceneTileSize;
+		loadedSceneVerLeftN++;
+		for(var i=0;i<sceneMaxTileLoad;i++) {
+			Lib('scene-grass'+loadedSceneTiles).sprite({
+				src:'/graphics/tiles.png',
+				size:[sceneTileSize,sceneTileSize],
+				position:[0,0],
+				frames:[0],
+				x:loadedSceneVerLeft,
+				y:(sceneTileSize*i)+(playerBlockLocationY*sceneTileSize)
+			});
+			loadedSceneTiles++;
+		}
+		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
+			sceneLoaded = true;
+			Lib.emit('mapload',[player,this]);
+		});
+	}
+	if(player.getOffsetY()+player.getY() <= loadedSceneHorTop && sceneLoaded) {
+		//load tiles to the horizontal top
+		sceneLoaded = false;
+		loadedSceneHorTop -= sceneTileSize;
+		for(var i=0;i<sceneMaxTileLoad;i++) {
+			Lib('scene-grass'+loadedSceneTiles).sprite({
+				src:'/graphics/tiles.png',
+				size:[sceneTileSize,sceneTileSize],
+				position:[0,0],
+				frames:[0],
+				x:(sceneTileSize*i)+(playerBlockLocationX*sceneTileSize),
+				y:loadedSceneHorTop
+			});
+			loadedSceneTiles++;
+		}
+		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
+			sceneLoaded = true;
+			Lib.emit('mapload',[player,this]);
+		});
+	}
+	if(player.getOffsetY()+player.getY()+player.getHeight() >= loadedSceneHorBot && sceneLoaded) {
+		//load tiles to the horizontal bottom
+		sceneLoaded = false;
+		//log data
+		for(var i=0;i<sceneMaxTileLoad;i++) {
+			Lib('scene-grass'+loadedSceneTiles).sprite({
+				src:'/graphics/tiles.png',
+				size:[sceneTileSize,sceneTileSize],
+				position:[0,0],
+				frames:[0],
+				x:(sceneTileSize*i)+(playerBlockLocationX * sceneTileSize),
+				y:loadedSceneHorBot
+			});
+			loadedSceneTiles++;
+		}
+		//update map data
+		loadedSceneHorBot += sceneTileSize;
+		loadedSceneHorBotN++;
+		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
+			sceneLoaded = true;
+			Lib.emit('mapload',[player,this]);
+		});
+	}
+	if(player.getOffsetX()+player.getX()+player.getWidth() >= loadedSceneVerRight && sceneLoaded) {
+		//load tiles to the vertical right
+		sceneLoaded = false;
+		for(var i=0;i<sceneMaxTileLoad;i++) {
+			Lib('scene-grass'+loadedSceneTiles).sprite({
+				src:'/graphics/tiles.png',
+				size:[sceneTileSize,sceneTileSize],
+				position:[0,0],
+				frames:[0],
+				x:loadedSceneVerRight,
+				y:(sceneTileSize*i)+(playerBlockLocationY*sceneTileSize)
+			});
+			loadedSceneTiles++;
+		}
+		loadedSceneVerRight += sceneTileSize;
+		Lib('scene-grass'+(loadedSceneTiles-1)).load(function() {
+			sceneLoaded = true;
+			Lib.emit('mapload',[player,this]);
+		});
+	}
+}
+function initEvents() {
+	//chat -- listen for key
+	window.addEventListener('keydown',function(key) {
+		if(key.keyCode == 8) {
+			//backspace
+			if(chatMode) {
+				if(logInputText.length > 1) {
+					logInputText.splice(logInputText.length-2,1);
+				}
+			}
+		}
+		if(key.keyCode == 27) {
+			if(chatMode) {
+				chatMode = false;
+				logInputText = [];
+			}
+		}
+		if(key.keyCode == 13) {
+			//enter
+			if(chatMode) {
+				//send message to the server
+				chatMode = false;
+				logInputText.pop();
+				if(logInputText.length) {
+					if(logInputText[0] == '/') {
+						var command = chatCommands[logInputText.join('').substring(1)];
+						if(command) {
+							command.call(this,command.split(' ').splice(0,1));
+							logInputText = [];
+							return;
+						}
+					}
+					if(logInputText.length > 50) {
+						for(var i=50;i<logInputText.length;i+=50) {
+							logInputText.splice(i,0,'\n');
+						}
+					}
+					server.emit('chatmessage',{message:logInputText,sender:id});
+					logInputText = [];
+				}
+			} else {
+				chatMode = true;
+				logInputText.push('|');
+			}
+		}
+		if(key.keyCode == 82) {
+			if(!chatMode) {
+				window.location.reload();
+			}
+		}
+		if(chatMode && (chatAllowedKeys.indexOf(key.keyCode) != -1 || key.keyCode >= 48 && key.keyCode <= 90)) {
+			var k = String.fromCharCode(key.keyCode).toLowerCase();
+			if(key.shiftKey) k = chatSpecialKeysShift[key.keyCode] || k;
+			else k = chatSpecialKeys[key.keyCode] || k;
+			logInputText.pop();
+			logInputText.push(k);
+			logInputText.push('|');
+		}
+		if(key.keyCode == 84 || key.keyCode == 191) {
+			//T key pressed
+			if(!chatMode) {
+				chatMode = true;
+				logInputText.push('|');
+			}
+		}
+	});
+}
+</script>
+</body>
+</html>
