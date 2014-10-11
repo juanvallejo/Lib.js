@@ -1,65 +1,137 @@
+/**
+* Provided without license, as is.
+*
+* @file Lib.js
+*
+* @author juanvallejo
+* @date 10/7/14
+*
+* Global varable and constant declaration. This file holds main game variable declarations and constant information.
+*
+* Note: Include important notes on program here.
+*
+* Important: Include anything needed to run / dependencies required here.
+**/
+
 (function() {
+/**
+ * holds global 'window' event data
+**/
 var Events = {
 	resize:[]
 };
+
+/**
+ * Main loop using frame-by-frame animation method. Defaults to setTimeout fallback if API not present.
+ * Also defines time values needed for frame animation
+ *
+ * @param a = function to be looped
+**/
 var frame = (function() {
 	return window.requestAnimationFrame || 
 		   window.mozRequestAnimationFrame ||
 		   window.webkitRequestAnimationFrame ||
+
+		   //fallback method for animation loop
 		   function t(a) {
 				setTimeout(a,1000/60);
 			};
 })(),time = {
-	dt:null,
-	now:Date.now(),
-	last:Date.now(),
-	ellapsed:0
+	dt:null,													// difference in time between last timestamp and current timestamp
+	now:Date.now(),												// current timestamp in milliseconds
+	last:Date.now(),											// last recorded timestamp in milliseconds
+	ellapsed:0													// time ellapsed in milliseconds since animation started
+
+// holds data for debugging and resetting animation settings, as well as log data
 },debug = {
-	_reset:false,
-	_mainCalled:false,
-	_eventsInit:false,
-	_indexCountInit:false,
-	_paused:false,
-	log:false,
-	logfps:false,
-	runAnimation:true,
-	useSingleCanvasMode:false
+	_reset:false,												// tells library settings have been reset
+	_mainCalled:false,											// tells library animation has started
+	_eventsInit:false,											// tells library events have been initialized
+	_indexCountInit:false,										// tells library at least one user object has been created
+	_paused:false,												// tells library to pause animation loop
+	log:false,													// tells library to log debug data to console
+	logfps:false,												// tells library to output frames-per-second data
+	runAnimation:true,											// tells library to animate sprites
+	useSingleCanvasMode:false									// tells library to pretend only one canvas will ever be used
 };
-function Sprite(url,size,speed,pos,dir,frames,canvas) {
-	this._index = 0;
-	this.canvas = canvas;
-	this.dir = dir || 'horizontal';
-	this.frames = frames;	
-	this.pos = pos || [0,0];
-	this.size = size;
-	this.frequency = speed || 0;
-	this.url = url;
-	this.runAnimation = true;
-	this.reverseAnimation = false;
+
+/**
+ * Holds setting information for each sprite object; includes image url, size, and animation settings
+ * Treated as Object.class, meant to be instantiated, not used statically
+ *
+ * @param url = path/to/image/location
+ * @param size = fixed size of each sprite-sheet 'frame'. Must be provided by the user
+ * @param frequency = framerate for the sprite animation loop
+ * @param position = [array] of coordinates setting the position on the sprite sheet
+ * @param direction = 'horizontal' or 'vertical' ... indicates whether to move vertically or horizontally across sprite sheet
+ * @param frames = tells library which frames to display and in what order
+ * @param canvas = canvas object to draw sprite to
+**/
+function Sprite(url, size, frequency, position, direction, frames, canvas) {
+
+	this._index = 0;											// sum of all framerates since animation began
+	this.canvas = canvas;										// canvas object to draw spritesheet to
+	this.dir = direction || 'horizontal';						// direction to move accross spritesheet (horizontal | vertical)
+	this.frames = frames;										// frame sequence to display
+	this.frequency = frequency || 0;							// rate of spritesheet animation (0 for static image)
+	this.height;												// holds dynamically computed heigth value; used with scaling
+	this.pos = position || [0,0];								// position of current frame
+	this.runAnimation = true;									// flag (true | false) to force sprite into static mode
+	this.reverseAnimation = false;								// play current frame sequence in reverse order if set to true
+	this.scale = false;											// flag (true | false) tells library whether frame is to be scaled
+	this.size = size;											// size of each sprite image in the spritesheet
+	this.url = url;												// location of resource to use as spritesheet image
+	this.width;													// holds dynamically computed width value; used with scaling
 };
+
+/**
+ * Updates the _index field of the spritesheet by increasing its value by the difference between
+ * the current frame and the last frame. This is used to calculate the current frame on the
+ * spritesheet. 
+ *
+ * @param dt = difference in time between last frame and current frame
+**/
 Sprite.prototype.update = function(dt) {
 	this._index += this.frequency * dt;
 };
+
+/**
+ * Updates the _index field of the spritesheet by increasing its value by the difference between
+ * the current frame and the last frame. This is used to calculate the current frame on the
+ * spritesheet. 
+ *
+ * @param ctx = 
+**/
 Sprite.prototype.render = function(ctx) {
-	var max = this.frames.length;
-	var idx = Math.floor(this._index);
-	var frame = this.frames[idx % max];
-	var x = this.pos[0],y = this.pos[1];
+	var max = this.frames.length;								// max number of frames to display
+	var idx = Math.floor(this._index);							// current frame number to fetch from array
+	var frame = this.frames[idx % max];							// position offset from spritesheet sprites
+	var x = this.pos[0];										// x position of current sprite on spritesheet
+	var y = this.pos[1];										// y position of current sprite on spritesheet
+
 	if(!this.runAnimation) {
-		if(this.reverseAnimation) frame = this.frames.length-1;
-		else frame = 0;
+		if(this.reverseAnimation) {
+			frame = this.frames.length - 1;
+		} else {
+			frame = 0;
+		}
 	}
-	if(this.dir == 'horizontal') x += this.size[0]*frame;
-	else y += this.size[1]*frame;
 
-	var width = this.size[0];
-	var height = this.size[1];
+	if(this.dir == 'horizontal') {
+		x += this.size[0] * frame;								// calculates x coord of sprite based on frame width and offset
+	} else {
+		y += this.size[1] * frame;								// calculates y coord of sprite based on frame height and offset
+	}
+
+	var width = this.size[0];									// save the width of the current frame in order to modify it
+	var height = this.size[1];									// save the width of the current frame in order to modify it
+
 	if(this.scale) {
-		width *= this.scale;
-		height *= this.scale;
+		width *= this.scale;									// adjust the width according to scale value defined by user
+		height *= this.scale;									// adjust the height according to scale value defined by user
 
-		this.width = width;
-		this.height = height;
+		this.width = width;										// save scaled width separate from original width
+		this.height = height;									// save scaled height separate from original height
 	}
 
 	ctx.drawImage(Lib.resources[this.url],x,y,this.size[0],this.size[1],0,0,width,height);
