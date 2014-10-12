@@ -6,7 +6,10 @@
 * @author juanvallejo
 * @date 10/7/14
 *
-* Canvas animation library.
+* Canvas animation library. Consists of three separate 'method modules' that define methods specific
+* to the Lib object, spritesheet objects, canvas line objects, and canvas rectangle objects.
+* Such events are separated for modularity and readability in one file. Shared methods are functions that
+* are general enough to apply to all three types of Lib.js objects.
 *
 * Note: Include important notes on program here.
 *
@@ -25,7 +28,7 @@ var Events = {
  * Main loop using frame-by-frame animation method. Defaults to setTimeout fallback if API not present.
  * Also defines time values needed for frame animation
  *
- * @param a = function to be looped
+ * @param a = {Function} function to be looped
 **/
 var frame = (function() {
 	return window.requestAnimationFrame || 
@@ -60,13 +63,13 @@ var frame = (function() {
  * Holds setting information for each sprite object; includes image url, size, and animation settings
  * Treated as Object.class, meant to be instantiated, not used statically
  *
- * @param url = path/to/image/location
- * @param size = fixed size of each sprite-sheet 'frame'. Must be provided by the user
- * @param frequency = framerate for the sprite animation loop
- * @param position = [array] of coordinates setting the position on the sprite sheet
- * @param direction = 'horizontal' or 'vertical' ... indicates whether to move vertically or horizontally across sprite sheet
- * @param frames = tells library which frames to display and in what order
- * @param canvas = canvas object to draw sprite to
+ * @param url 		= {String}	path/to/image/location
+ * @param size 		= {Array} 	[width, height] of each sprite-sheet 'frame'. Must be provided by the user
+ * @param frequency = {Integer} framerate for the sprite animation loop
+ * @param position 	= {Array} 	of coordinates setting the position on the sprite sheet
+ * @param direction = {String} 	('horizontal' | 'vertical') ... indicates whether to move vertically or horizontally across sprite sheet
+ * @param frames 	= {Array} 	tells library which frames to display and in what order
+ * @param canvas 	= {Canvas}	canvas object to draw sprite to
 **/
 function Sprite(url, size, frequency, position, direction, frames, canvas) {
 
@@ -90,7 +93,7 @@ function Sprite(url, size, frequency, position, direction, frames, canvas) {
  * the current frame and the last frame. This is used to calculate the current frame on the
  * spritesheet. 
  *
- * @param dt = difference in time between last frame and current frame
+ * @param dt = {Float} difference in time between last frame and current frame
 **/
 Sprite.prototype.update = function(dt) {
 	this._index += this.frequency * dt;
@@ -147,11 +150,11 @@ Sprite.prototype.render = function(ctx) {
 var Lib = {
 	canvas:null,												// holds last assigned canvas object
 	canvases:[],												// holds array of every canvas object assigned
-	ctx:null,													// holds 2D context of last assigned canvas object
-    offset:{
-    	x:0,													// holds the current [screen] offset
-    	y:0
-    },											
+	canvasEvents:{
+		click:[]												// holds functions to be called when main canvas is clicked
+	},
+	ctx:null,													// holds 2D context of last assigned canvas object							
+	customevents:{},
 	detached:[],
 	entities:{},
 	entityExists:{},
@@ -159,12 +162,15 @@ var Lib = {
 	eventQueue:{},
 	extensions:{},
 	externalRenderings:[],
-	customevents:{},
 	id:null,
+	inputRules:[],
 	keys:{},
 	loaded:false,
-	inputRules:[],
 	objects:[],
+	offset:{
+    	x:0,													// holds the current [screen] offset
+    	y:0
+    },	
 	pending:{length:0},
 	readyEvents:[],
 	resources:{},
@@ -252,9 +258,11 @@ var Lib = {
         },
 		click:function(a) {
 			requireID();
-			if(!Lib.eventQueue[Lib.id]) Lib.eventQueue[Lib.id] = [];
-			Lib.eventQueue[Lib.id].push(a);
-			if(Lib.loaded && Lib.entities[Lib.id]) Lib.sharedEvents.click.call(this,a);
+			if(!Lib.eventQueue[this.id]) Lib.eventQueue[this.id] = [];
+			Lib.eventQueue[this.id].push(a);
+			if(Lib.loaded && Lib.entities[this.id]) {
+				Lib.sharedEvents.click.call(this, a);
+			}
 		},
 		freeze:function() {
 			//this.stopAnimation();
@@ -326,10 +334,10 @@ var Lib = {
 	sharedEvents:{
 		click:function(a) {
 			var self = this;
-			this.canvas.addEventListener('click',function(e) {
-				var pageX = e.pageX - this.getBoundingClientRect().left;
-				var pageY = e.pageY - this.getBoundingClientRect().top;
-				if((pageX >= self.x && pageX <= self.x + self.settings.size[0]) && (pageY >= self.y && pageY <= self.y + self.settings.size[1])) {
+			Lib.canvasEvents.click.push(function(e) {
+				var pageX = e.pageX - Lib.canvas.getBoundingClientRect().left;
+				var pageY = e.pageY - Lib.canvas.getBoundingClientRect().top;
+				if((pageX >= self.getX() && pageX <= self.x + self.size[0]) && (pageY >= self.y && pageY <= self.y + self.size[1])) {
 					a.call(self);
 				}
 			});
@@ -556,7 +564,7 @@ var Lib = {
  		 * Checks whether a passed Lib.js object has been 'detached' from the rest of the objects
  		 * by looking to see if a _detachIndex property has been set.
 		 *
- 		 * @return: true if a _detachIndex has been assigned, false otherwise
+ 		 * @return = {Boolean} true if a _detachIndex has been assigned, false otherwise
 		**/
 		isObjectDetached:function(object) {
 			return object._detachIndex ? true : false;
@@ -613,9 +621,7 @@ var Lib = {
 			var canvas = c || Lib.canvases[Lib.canvas._index];
 			if(!canvas.runAnimation) { ////--
 				canvas.runAnimation = true;
-			//	for(var i=0;i<Lib.objects.length;i++) {
-			//		if(Lib.objects[i].settings.type == "sprite") Lib.objects[i].sprite.runAnimation = true;
-			//	}
+			
 				var objects = canvas.objects;
 				for(var i=0;i<objects.length;i++) {
 					if(objects[i].settings.type == "sprite") objects[i].spritesheet.runAnimation = true;
@@ -626,9 +632,7 @@ var Lib = {
 			var canvas = c || Lib.canvases[Lib.canvas._index];
 			if(canvas.runAnimation) {
 				canvas.runAnimation = false;
-			//	for(var i=0;i<Lib.objects.length;i++) {
-			//		if(Lib.objects[i].settings.type == "sprite") Lib.objects[i].sprite.runAnimation = false;
-			//	}
+
 				var objects = canvas.objects;
 				for(var i=0;i<objects.length;i++) {
 					if(objects[i].settings.type == "sprite") objects[i].spritesheet.runAnimation = false;
@@ -663,6 +667,11 @@ var Lib = {
 			});
 			Lib.canvas.addEventListener('keyup',function(e) {
 				Lib.keys[e.keyCode] = false;
+			});
+			Lib.canvas.addEventListener('click',function(e) {
+				Lib.canvasEvents.click.forEach(function(action) {
+					action.call(Lib, e);
+				});
 			});
 			var canvas = Lib.canvas;
 			canvas.focus();
@@ -802,138 +811,248 @@ var Lib = {
 			}
 			Lib.sprite(settings);
 		},
-		sprite:function(a,b,c,d,e,f) {
+
+		/**
+ 		 * Adds a sprite object [to the global entities array] to be rendered.
+ 		 * If the first @param is of type Object {}, the rest of the paramters are ignored
+ 		 * and the fields of the first @param object are assigned as settings to the sprite object
+		 *
+		 * Spite objects consist of clipping sections of a spritesheet image containing individual 'frames'
+		 * and displaying such frames one at a time in the order specified by the user
+		 *
+ 		 * @param source 		= {String}	path/to/image | {Object} dictionary with sprite properties
+  		 * @param frameSize 	= {Array} 	[width, height] of each frame on the spritesheet
+ 		 * @param frequency 	= {Integer}	framerate of sprite animation
+ 		 * @param position 		= {Array} 	position on spreashseet to begin reading
+ 		 * @param orientation 	= {String}	('horizontal' | 'vertical') direction to read spreadsheet
+ 		 * @param frameSequence = {Array} 	of integers representing sequence and amount of frames to read
+ 		 *
+ 		 * @return self 		= {*Sprite}	returns pointer to current Lib.js Sprite object
+		**/
+		sprite:function(source, frameSize, frequency, position, orientation, frameSequence) {
+			// require an id to be passed to the Lib function [Lib(REQUIRED_ID).sprite(...)] before initializing this method.
+			// require a canvas to have been assigned to Lib.js before initializing this method.
 			requireID();
 			requireCanvas();
+
+			// define default sprite settings
 			var settings = {
-				type:"sprite",
-				id:null,
-				src:null,
-				size:null,
-				scale:null,
-				speed:100,
-				frequency:16,
-				position:[0,0],
-				direction:'horizontal',
-				frames:null,
-				reverse:false,
-				logfps:false,
-				x:0,
-				y:0
+				type:'sprite',									// type of Lib.js object being created
+				id:null,										// id name to assign to object (*required as stated above)
+				index:null,										// tabIndex of our object. Higher index places object on top of others
+				src:null,										// source of our spritesheet (*)
+				size:null,										// defined by @param frameSize
+				scale:null,										// value >= 0.1 to scale image by
+				speed:100,										// translation speed of object accross canvas
+				spritesheet:null,								// Sprite object containing sprite animation render data
+				frequency:16,									// defined by @param frequency
+				position:[0,0],									// defined by @param position
+				direction:'horizontal',							// defined by @param direction
+				frames:null,									// defined by @param frameSequence
+				renderings:[],									// array of user functions. Called every frame with object as context
+				reverse:false,									// determines whether frameSequence array will be read in reverse
+				logfps:false,									// flag for toggling console log output of framerate rendering
+				x:0,											// x position of object on game screen
+				y:0												// y position of object on game screen
 			};
-			if(typeof a == 'object') {
-				for(var i in a) {
-					settings[i] = a[i];
+
+			// determine if first @param is of type object
+			if(typeof source == 'object') {
+				for(var i in source) {
+					settings[i] = source[i];					// assign values of Object first @param to default sprite settings
 				}
 			} else {
-				settings.src = a;
-				settings.size = b;
-				settings.frequency = c;
-				settings.position = d;
-				settings.direction = e;
-				settings.frames = f;
+				// assign passed @params one by one to their respective default sprite settings
+				settings.src = source;
+				settings.size = frameSize;
+				settings.frequency = frequency;
+				settings.position = position;
+				settings.direction = orientation;
+				settings.frames = frameSequence;
 			}
+
+			// make sure a sprite source and size are passed as @parameters
 			if((!settings.src || !settings.size) && settings.type == "sprite") throw "You must provide a sprite source and size.";
+
+			// if an id was passed as a @param by the user, use that instead of existing (required) id
 			if(settings.id) Lib.id = settings.id;
-			var pendingObject = {
-				_index:Lib.canvases.length-1,
-				id:Lib.id,
-				index:settings.index,
-				x:settings.x,
-				y:settings.y,
-				size:settings.size,
-				speed:settings.speed,
-				settings:settings,
-				image:new Image(),
-				canvas:Lib.canvas,
-				ctx:Lib.canvas.getContext("2d"),
-				spritesheet:null,
-				renderings:[]
-			};
-			var methods = {};
+
+			// finish adding default sprite settings such as spritesheet 2D canvas context,
+			// and image information.
+			settings._index = Lib.canvases.length-1;
+			settings.id = Lib.id;
+			settings.settings = settings;						// circular pointer to settings to add support to old methods
+			settings.canvas = Lib.canvas;						// pointer to our main canvas
+			settings.ctx = Lib.canvas.getContext("2d");			// shortcut to our 2D canvas context for drawing to screen
+
+			var methods = {};									// dictionary object containing shared methods and sprite methods
+
+			// add every method in the sharedEvents: module to the methods dictionary
 			for(var i in Lib.sharedEvents) {
 				methods[i] = Lib.sharedEvents[i];
 			}
+
+			// add every method in the spriteEvents: module to the methods dictionary. If the method was
+			// already added by the sharedEvents: module, overwrite it with the spriteEvents: module method
 			for(var i in Lib.spriteEvents) {
 				methods[i] = Lib.spriteEvents[i];
 			}
+
+			//add every method collected in the methods{} dictionary to the default sprite settings
 			for(var i in methods) {
-				if(!pendingObject[i]) pendingObject[i] = methods[i];
+				if(!settings[i]) settings[i] = methods[i];
 			}
-			Lib.pending.length++;
-			Lib.pending[Lib.id] = pendingObject;
-			Lib.pending[Lib.id].image.src = settings.src;
-			Lib.pending[Lib.id].image.id = Lib.id;
-			Lib.pending[Lib.id].image.addEventListener('load',function() {
-				var self = Lib.pending[this.id];
-				if(!self.settings.frames) {
-					self.settings.frames = [];
-					var count = Math.floor(this.width / self.settings.size[0]);
-					if(self.settings.reverse) {
-						for(var i = count-1;i >= 0;i--) {
-							self.settings.frames.push(i);
+
+			Lib.pending.length++;								// increase the length of our pending objects collection
+			Lib.pending[Lib.id] = settings;						// store settings as key-value pair to global dictionary of
+																// pending objects using id as key
+
+			settings.image = getImageFromURL(settings.src,function(image) {
+				var self = settings;							// assign pointer to settings for readability. (self == settings)
+
+				// make sure we have a frame size array defined
+				// if one was not defined by user, set default
+				// dimensions to those of our image.
+				if(!self.size) {
+					self.size = [];
+					self.size[0] = image.width;
+					self.size[1] = image.height;
+				}
+
+				// make sure we have a frame sequence to work with
+				// if one was not defined by user, calculate default
+				// sequence using frameSize and image dimensions
+				if(!self.frames) {
+					// initialize variable to hold total amount of frames we'll have
+					var count = Math.floor(image.width / self.size[0]);
+					
+					self.frames = [];
+
+					// push frame sequence in order (reverse | forward) defined by settings
+					if(self.reverse) {
+						for(var i = count - 1; i >= 0; i--) {
+							self.frames.push(i);
 						}
 					} else {
-						for(var i=0;i<count;i++) {
-							self.settings.frames.push(i);
+						for(var i = 0; i < count; i++) {
+							self.frames.push(i);
 						}
 					}
 				}
-				if(!self.settings.size) {
-					self.settings.size = [];
-					self.settings.size[0] = this.width;
-					self.settings.size[1] = this.height;
+
+				// This method supports default / static images. If user defined type is of 'image',
+				// revert back to sprite. Method will work the same for both settings.
+				if(self.type == 'image') {
+					self.type = 'sprite';
 				}
-				if(self.settings.type == "image") self.settings.type = "sprite";
-				if(self.settings.x == 'center') self.settings.x = self.canvas.width / 2 - self.settings.size[0] / 2;
-				else if(self.settings.x == 'right') self.settings.x = self.canvas.width - self.settings.size[0];
-				else if(self.settings.x == 'left' || !self.settings.x || typeof self.settings.x == 'string') self.settings.x = 0;
-				if(self.settings.y == 'center') self.settings.y = self.canvas.height / 2 - self.settings.size[1] / 2;
-				else if(self.settings.y == 'bottom') self.settings.y = self.canvas.height - self.settings.size[1];
-				else if(self.settings.y == 'top' || !self.settings.y || typeof self.settings.y == 'string') self.settings.y = 0;
-				self.x = self.settings.x;
-				self.y = self.settings.y;
-				self.spritesheet = new Sprite(self.settings.src,self.settings.size,self.settings.frequency,self.settings.position,self.settings.direction,self.settings.frames,self.canvas);
-				if(self.settings.reverse) self.spritesheet.reverseAnimation = true;
-				if(self.settings.scale) self.spritesheet.scale = self.settings.scale;
-				Lib.events.addObject(self,self.id);
-				Lib.resources[self.settings.src] = this;
+
+				// if a string value is passed for our object coordinates, translate
+				// string to pre-defined values of 'center', 'right', 'left', 'top',
+				// and 'bottom' indicating where to draw our image on the screen.
+				if(self.x == 'center') {
+					self.x = self.canvas.width / 2 - self.size[0] / 2;
+				} else if(self.x == 'right') {
+					// draw on the right of the screen by subtracting the width of an individual frame
+					// from the total size of our canvas
+					self.x = self.canvas.width - self.size[0];
+				} else if(self.x == 'left' || !self.x || typeof self.x == 'string') {
+					self.x = 0;
+				}
+
+				// do the same for our y coordinate
+				if(self.y == 'center') {
+					self.y = self.canvas.height / 2 - self.size[1] / 2;
+				} else if(self.y == 'bottom') {
+					// subtract the height of an individual frame from the canvas height
+					self.y = self.canvas.height - self.size[1];
+				} else if(self.y == 'top' || !self.y || typeof self.y == 'string') {
+					self.y = 0;
+				}
+
+				// initialize our spritesheet object. Instantiate Sprite class with predefined settings
+				self.spritesheet = new Sprite(self.src, self.size, self.frequency, self.position, self.direction, self.frames, self.canvas);
+				
+				// adjust oru spritesheet settings based on our default settings from above
+				if(self.reverse) {
+					self.spritesheet.reverseAnimation = true;	// force Sprite class to render frames in reverse order
+				}
+
+				if(self.scale) {
+					self.spritesheet.scale = self.scale;
+				}
+
+				// add object to main library object array
+				Lib.events.addObject(self, self.id);
+
+				// Since our sprite object will not be recognized by the browser, we must add events such as
+				// 'click', 'mouseover', etc... manually. We simulate these by listening to such methods with
+				// the Canvas object, and mapping them to each of our objects. Below, we store user-defined actions
+				// that are to take place when such events are detected against one of our objects.
 				if(Lib.eventQueue[self.id]) {
-					var evts = Lib.eventQueue[self.id];
-					Lib.entities[self.id].hasEvent = true;
-					self.canvas.addEventListener("click",function(e) {
-						var pageX = e.pageX - this.getBoundingClientRect().left;
-						var pageY = e.pageY - this.getBoundingClientRect().top;
-						if((pageX >= self.x && pageX <= self.x + self.settings.size[0]) && (pageY >= self.y && pageY <= self.y + self.settings.size[1])) {
-							for(var i=0;i<evts.length;i++) {
-								evts[i].call(self,e);
+					// Check to see if any event actions have
+					// been assigned for current object id
+					var events = Lib.eventQueue[self.id];		// fetch all event actions for current object as array of functions
+					Lib.entities[self.id].hasEvent = true;		// our object has an event. Set flag accordingly.
+
+					Lib.canvasEvents.click.push(function(e) {
+						var pageX = e.pageX - Lib.canvas.getBoundingClientRect().left;	// get position of current object with respect...
+						var pageY = e.pageY - Lib.canvas.getBoundingClientRect().top;		// ...to the canvas's position on the page
+
+						// if cursor is within the boundaries of our object on canvas click event,
+						// call all of this object's functions assigned to its 'click' event
+						if((pageX >= self.x && pageX <= self.x + self.size[0]) && (pageY >= self.y && pageY <= self.y + self.size[1])) {
+							for(var i = 0; i < events.length; i++) {
+								events[i].call(self, e);
 							}
 						}
 					});
 				}
+
+				// if there are any user-defined methods for this object's id,
+				// add them to the object.
 				if(Lib.extensions[self.id]) {
 					for(var i in Lib.extensions[self.id]) {
 						self[i] = Lib.extensions[self.id][i];
 					}
 				}
+
+				// call any functions that have been assigned to run as soon as
+				// the sprite image has been loaded and this object is ready
 				if(Lib.entityReadyEvents[self.id]) {
 					for(var i=0;i<Lib.entityReadyEvents[self.id].length;i++) {
 						Lib.entityReadyEvents[self.id][i].call(self);
 					}
 				}
+
+				// If all pending objects have been loaded, and Lib.js has not been previously
+				// initialized, initialize it by setting Lib.loaded to true
 				if(!Lib.loaded) {
 					if(Lib.objects.length == Lib.pending.length) {
-						Lib.loaded = true;
+						Lib.loaded = true;						// tells library all pending objects have loaded
+
+						// call all functions assigned to run as soon as at least
+						// one object has loaded using the "Lib.load..." method.
 						for(var i=0;i<Lib.readyEvents.length;i++) {
 							Lib.readyEvents[i].call(Lib);
 						}
 					}
 				}
-				if(!debug._mainCalled) debug._mainCalled = true,main();
+
+				// if the main animation loop hasn't been called yet,
+				// call it, since at least one object has been added.
+				if(!debug._mainCalled) {
+					debug._mainCalled = true;					// tells library main function has been called
+
+					// begin animation loop
+					main();
+				}
 			});
+
+			return settings;
 		}
 	}
 };
+
 function requireCanvas(a) {
 	if(!a) {
 		if(!Lib.canvas) throw "Error: Canvas element not specified.";
@@ -944,15 +1063,48 @@ function requireCanvas(a) {
 			if(a.nodeName != 'CANVAS') throw "Element specified must be a canvas element.";
 		}
 	}
-};
+}
+
 function requireID() {
 	if(!Lib.id) throw "You must provide an object id.";
-};
+}
+
+/**
+ * Checks to see if an image has been previously used / loaded before by looking
+ * for its path in the global resource cache. If the image has not previously been,
+ * loaded, it is loaded and added to the cache
+ *
+ * @param url		= {String}	 path/to/resource
+ * @param callback	= {Function} function to be called after resource becomes available
+ *
+ * @return = {Image} pointer to cached image
+**/
+function getImageFromURL(url, callback) {
+	// checks resources cache for resource
+	if(Lib.resources[url]) {
+		// if resource is found in cache, call callback,
+		// make context image, and pass image object as @param 
+		callback.call(Lib.resources[url], Lib.resources[url]);
+	} else {
+		Lib.resources[url] = new Image();						// create new Image object and store it in cache
+		Lib.resources[url].src = url;							// assign image source the passed path/to/resource
+
+		// wait until image loads before calling callback
+		Lib.resources[url].addEventListener('load', function() {
+			//call callback with context of cached image and pass it as first @param
+			callback.call(this, this);
+		});
+	}
+
+	return Lib.resources[url];
+}
+
 function canSlowWrite() {
 	var bool = false;
 	if(!(time.now % 10) && !(time.now % 6) && !(time.now % 8)) bool = true;
 	return bool;
 }
+
 function main() {
 	time.now = Date.now();
 	time.dt = (time.now - time.last) / 1000;
@@ -962,14 +1114,16 @@ function main() {
 	render();
 	if(debug.logfps && canSlowWrite()) console.log("Running at "+Math.round(1000 / (time.dt*1000))+" FPS");
 	if(!debug._reset && !debug._paused) frame(main);
-};
+}
+
 function parseInput(dt) {
 	if(Lib.inputRules.length) {
 		for(var i=0;i<Lib.inputRules.length;i++) {
 			Lib.inputRules[i].call(Lib)
 		}
 	}
-};
+}
+
 function update(dt) {
 	if((debug.useSingleCanvasMode || Lib.canvases.length == 1) && Lib.canvas) Lib.ctx.clearRect(0,0,Lib.canvas.width,Lib.canvas.height);
 	else if(Lib.canvases.length > 1) {
@@ -983,7 +1137,8 @@ function update(dt) {
 		if(Lib.objects[i].settings.type == "sprite") Lib.objects[i].spritesheet.update(dt);
 	}
 	time.ellapsed++;
-};
+}
+
 function render() {
 	var ctx;													// current 2D canvas context being looped through
 
@@ -1018,7 +1173,8 @@ function render() {
 			rendering.call(Lib,ctx);
 		});
 	}
-};
+}
+
 function lib(a) {
 	debug._reset = false;
 	var rtrn = Lib.events;
@@ -1036,7 +1192,8 @@ function lib(a) {
 		if(!Lib.entityExists[Lib.id]) Lib.entityExists[Lib.id] = true;
 	}
 	return rtrn;
-};
+}
+
 if(!debug._eventsInit) {
 	debug._eventsInit = true;
 	for(var i in Events) {
