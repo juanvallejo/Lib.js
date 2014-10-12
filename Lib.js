@@ -6,7 +6,7 @@
 * @author juanvallejo
 * @date 10/7/14
 *
-* Global varable and constant declaration. This file holds main game variable declarations and constant information.
+* Canvas animation library.
 *
 * Note: Include important notes on program here.
 *
@@ -42,12 +42,13 @@ var frame = (function() {
 	last:Date.now(),											// last recorded timestamp in milliseconds
 	ellapsed:0													// time ellapsed in milliseconds since animation started
 
-// holds data for debugging and resetting animation settings, as well as log data
+// holds data for debugging and resetting animation settings,
+// as well as log data
 },debug = {
-	_reset:false,												// tells library settings have been reset
-	_mainCalled:false,											// tells library animation has started
-	_eventsInit:false,											// tells library events have been initialized
-	_indexCountInit:false,										// tells library at least one user object has been created
+	_reset:false,												// indicates that library settings have been reset
+	_mainCalled:false,											// indicates that library animation has started
+	_eventsInit:false,											// indicates that library events have been initialized
+	_indexCountInit:false,										// indicates that at least one user object has been created
 	_paused:false,												// tells library to pause animation loop
 	log:false,													// tells library to log debug data to console
 	logfps:false,												// tells library to output frames-per-second data
@@ -134,14 +135,24 @@ Sprite.prototype.render = function(ctx) {
 		this.height = height;									// save scaled height separate from original height
 	}
 
-	ctx.drawImage(Lib.resources[this.url],x,y,this.size[0],this.size[1],0,0,width,height);
+	//draw the spritesheet [clipped to the current frame] to the canvas
+	ctx.drawImage(Lib.resources[this.url], x, y, this.size[0], this.size[1], 0, 0, width, height);
 };
+
+/**
+ * Main library. Static object containing methods, definitions, and settings for all animations
+ * Event methods are separated into sections based on the major types of objects Lib.js supports,
+ * including lines, rectangles, sprites / static images, and the library itself.
+**/
 var Lib = {
-	canvas:null,
-	canvases:[],
-	ctx:null,
-    offset:{x:0,y:0},
-	detached:null,
+	canvas:null,												// holds last assigned canvas object
+	canvases:[],												// holds array of every canvas object assigned
+	ctx:null,													// holds 2D context of last assigned canvas object
+    offset:{
+    	x:0,													// holds the current [screen] offset
+    	y:0
+    },											
+	detached:[],
 	entities:{},
 	entityExists:{},
 	entityReadyEvents:{},
@@ -159,14 +170,26 @@ var Lib = {
 	resources:{},
 	spriteEvents:{
 		attach:function() {
-			Lib.detached = null;
-			this._detach = false;
+			//Looks to see if object is detached by checking if a
+			// ._detachIndex has been assigned
+			if(this._detachIndex) {
+				// removes object from global array of detached objects
+				// 1 must be subtracted as detachIndex is always 1 + object's position in array
+				Lib.detached.splice(this._detachIndex - 1, 1);
+
+				this._detachIndex = null;						// sets the detach index for current object to none
+			} else {
+				console.log('Lib.attach error: object \''+this.id+'\' is not already detached');
+			}
 		},
 		detach:function() {
-			Lib.detached = this;
-			this._detach = true;
-            Lib.detached.storedX = this.getX();
-            Lib.detached.storedY = this.getY();
+			// adds the current sprite object to global
+			// array of detached objects
+			Lib.detached.push(this);
+
+			this._detachIndex = Lib.detached.length;			// sets object's detachIndex to its position on array + 1
+            Lib.detached.storedX = this.getX();					// saves the current x position of the detached object
+            Lib.detached.storedY = this.getY();					// saves the current y position of the detached object
 		},
         setOffsetX:function(a){
             Lib.offset.x = a;
@@ -221,7 +244,7 @@ var Lib = {
 			else Lib.offset.y -= this.speed * time.dt;
 		},
         isDetached:function(){
-            return (Lib.detached !== null && Lib.detached == this);
+            return (this._detachIndex ? true : false);
         },
         render:function(a) {
         	if(typeof a == 'function') this.renderings.push(a);
@@ -527,6 +550,16 @@ var Lib = {
 		},
 		hasInputKey:function(a) {
 			return Lib.keys[a];
+		},
+
+		/**
+ 		 * Checks whether a passed Lib.js object has been 'detached' from the rest of the objects
+ 		 * by looking to see if a _detachIndex property has been set.
+		 *
+ 		 * @return: true if a _detachIndex has been assigned, false otherwise
+		**/
+		isObjectDetached:function(object) {
+			return object._detachIndex ? true : false;
 		},
 		load:function(a) {
 			Lib.readyEvents.push(a);
@@ -952,16 +985,21 @@ function update(dt) {
 	time.ellapsed++;
 };
 function render() {
-	var ctx;
+	var ctx;													// current 2D canvas context being looped through
+
 	for(var i=0;i<Lib.canvases.length;i++) {
-		ctx = Lib.canvases[i].getContext("2d");
+		ctx = Lib.canvases[i].getContext("2d");					// set the local 2D context to that of the current canvas in loop 
 		for(var x=0;x<Lib.canvases[i].objects.length;x++) {
-			var xpos = Lib.canvases[i].objects[x].x;
-			var ypos = Lib.canvases[i].objects[x].y;
-			if(Lib.detached) {
-				if(Lib.detached.id != Lib.canvases[i].objects[x].id) {
-					xpos -= Lib.offset.x;
-					ypos -= Lib.offset.y;
+			var xpos = Lib.canvases[i].objects[x].x;			// amount of pixels in the x direction to translate canvas by
+			var ypos = Lib.canvases[i].objects[x].y;			// amount of pixels in the y direction to translate canvas by
+
+			// checks to see if any objects have been detached.
+			if(Lib.detached.length) {
+				// checks that current object has not been detached
+				// by checking for the existence of a ._detachIndex.
+				if(!Lib.canvases[i].objects[x]._detachIndex) {
+					xpos -= Lib.offset.x;						// decrease xpos by current object's horizontal offset from screen
+					ypos -= Lib.offset.y;						// decrease ypos by current object's vertical offset from screen
 				}
 			}
 			ctx.save();
