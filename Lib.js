@@ -260,7 +260,7 @@ var Lib = {
 			requireID();
 			if(!Lib.eventQueue[this.id]) Lib.eventQueue[this.id] = [];
 			Lib.eventQueue[this.id].push(a);
-			if(Lib.loaded && Lib.entities[this.id]) {
+			if(Lib.loaded && Lib.entities[this.id] || this.loaded) {
 				Lib.sharedEvents.click.call(this, a);
 			}
 		},
@@ -337,7 +337,7 @@ var Lib = {
 			Lib.canvasEvents.click.push(function(e) {
 				var pageX = e.pageX - Lib.canvas.getBoundingClientRect().left;
 				var pageY = e.pageY - Lib.canvas.getBoundingClientRect().top;
-				if((pageX >= self.getX() && pageX <= self.x + self.size[0]) && (pageY >= self.y && pageY <= self.y + self.size[1])) {
+				if((pageX >= self.getX() - self.getOffsetX() && pageX <= self.getX() - self.getOffsetX() + self.size[0]) && (pageY >= self.getY() - self.getDetachedY() && pageY <= self.getY() - self.getDetachedY() + self.size[1])) {
 					a.call(self);
 				}
 			});
@@ -827,7 +827,7 @@ var Lib = {
  		 * @param orientation 	= {String}	('horizontal' | 'vertical') direction to read spreadsheet
  		 * @param frameSequence = {Array} 	of integers representing sequence and amount of frames to read
  		 *
- 		 * @return self 		= {*Sprite}	returns pointer to current Lib.js Sprite object
+ 		 * @return self 		= {*Sprite}	returns pointer to current Lib.js Sprite object settings
 		**/
 		sprite:function(source, frameSize, frequency, position, orientation, frameSequence) {
 			// require an id to be passed to the Lib function [Lib(REQUIRED_ID).sprite(...)] before initializing this method.
@@ -837,21 +837,22 @@ var Lib = {
 
 			// define default sprite settings
 			var settings = {
-				type:'sprite',									// type of Lib.js object being created
-				id:null,										// id name to assign to object (*required as stated above)
-				index:null,										// tabIndex of our object. Higher index places object on top of others
-				src:null,										// source of our spritesheet (*)
-				size:null,										// defined by @param frameSize
-				scale:null,										// value >= 0.1 to scale image by
-				speed:100,										// translation speed of object accross canvas
-				spritesheet:null,								// Sprite object containing sprite animation render data
-				frequency:16,									// defined by @param frequency
-				position:[0,0],									// defined by @param position
 				direction:'horizontal',							// defined by @param direction
 				frames:null,									// defined by @param frameSequence
+				frequency:16,									// defined by @param frequency
+				id:null,										// id name to assign to object (*required as stated above)
+				index:null,										// tabIndex of our object. Higher index places object on top of others
+				loaded:false,									// indicates whether image resource has loaded for our object
+				logfps:false,									// flag for toggling console log output of framerate rendering
+				position:[0,0],									// defined by @param position
+				scale:null,										// value >= 0.1 to scale image by
+				size:null,										// defined by @param frameSize
+				speed:100,										// translation speed of object accross canvas
+				spritesheet:null,								// Sprite object containing sprite animation render data
+				src:null,										// source of our spritesheet (*)
 				renderings:[],									// array of user functions. Called every frame with object as context
 				reverse:false,									// determines whether frameSequence array will be read in reverse
-				logfps:false,									// flag for toggling console log output of framerate rendering
+				type:'sprite',									// type of Lib.js object being created
 				x:0,											// x position of object on game screen
 				y:0												// y position of object on game screen
 			};
@@ -988,6 +989,7 @@ var Lib = {
 				// 'click', 'mouseover', etc... manually. We simulate these by listening to such methods with
 				// the Canvas object, and mapping them to each of our objects. Below, we store user-defined actions
 				// that are to take place when such events are detected against one of our objects.
+
 				if(Lib.eventQueue[self.id]) {
 					// Check to see if any event actions have
 					// been assigned for current object id
@@ -1007,6 +1009,11 @@ var Lib = {
 						}
 					});
 				}
+
+				self.loaded = true;								// Let library know this object is ready to use. Needed if object's
+																// resource was cached, as it will load its functions from
+																// Lib.eventQueue before they are populated, since there is no
+																// 'lag' time between waiting for image to load, and rest of code
 
 				// if there are any user-defined methods for this object's id,
 				// add them to the object.
