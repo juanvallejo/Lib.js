@@ -1,5 +1,6 @@
 /**
-* Provided without license, as is.
+* Provided under the MIT License (c) 2014
+* See LICENSE @file for details.
 *
 * @file Lib.js
 *
@@ -335,10 +336,13 @@ var Lib = {
 		click:function(a) {
 			var self = this;
 			Lib.canvasEvents.click.push(function(e) {
-				var pageX = e.pageX - Lib.canvas.getBoundingClientRect().left;
-				var pageY = e.pageY - Lib.canvas.getBoundingClientRect().top;
+				var pageX = e.pageX - Lib.canvas.getBoundingClientRect().left;		// get position of current object with respect...
+				var pageY = e.pageY - Lib.canvas.getBoundingClientRect().top;		// ...to the canvas's position on the page
+				
+				// if cursor is within the boundaries of our object on canvas click event,
+				// call all of this object's functions assigned to its 'click' event
 				if((pageX >= self.getX() - self.getOffsetX() && pageX <= self.getX() - self.getOffsetX() + self.size[0]) && (pageY >= self.getY() - self.getDetachedY() && pageY <= self.getY() - self.getDetachedY() + self.size[1])) {
-					a.call(self);
+					a.call(self, e);
 				}
 			});
 		},
@@ -507,6 +511,18 @@ var Lib = {
 				Lib.canvases[o._index].objects.push(o);
 			}
 			Lib.objects.push(o);
+		},
+
+		/**
+		 * Takes function and adds it to canvasEvents.click[] Array to be called when
+		 * the canvas is clicked. Differs from sharedEvents click method as this method
+		 * does not have a resource object as context and does not take any object's 
+		 * position into account when calling the function passed.
+		 *
+		 * @param action = {Function} to be called when canvas is clicked
+		**/
+		click:function(action) {
+			Lib.canvasEvents.click.push(action);
 		},
 		emit:function(e,args) {
 			args = args || [];
@@ -996,18 +1012,12 @@ var Lib = {
 					var events = Lib.eventQueue[self.id];		// fetch all event actions for current object as array of functions
 					Lib.entities[self.id].hasEvent = true;		// our object has an event. Set flag accordingly.
 
-					Lib.canvasEvents.click.push(function(e) {
-						var pageX = e.pageX - Lib.canvas.getBoundingClientRect().left;	// get position of current object with respect...
-						var pageY = e.pageY - Lib.canvas.getBoundingClientRect().top;		// ...to the canvas's position on the page
-
-						// if cursor is within the boundaries of our object on canvas click event,
-						// call all of this object's functions assigned to its 'click' event
-						if((pageX >= self.x && pageX <= self.x + self.size[0]) && (pageY >= self.y && pageY <= self.y + self.size[1])) {
-							for(var i = 0; i < events.length; i++) {
-								events[i].call(self, e);
-							}
-						}
-					});
+					// loop through all queued events, assign them a context of our current
+					// object, and pass them to our objectClickEventParser function 'click'
+					// under sharedEvents to be added to our array of canvas click events.
+					for(var i = 0; i < events.length; i++) {
+						Lib.sharedEvents.click.call(self, events[i]);
+					}
 				}
 
 				self.loaded = true;								// Let library know this object is ready to use. Needed if object's
