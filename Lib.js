@@ -537,22 +537,40 @@ var Lib = {
 		},
 
 		/**
-		 * Takes function and adds it to canvasEvents.click[] Array to be called when
-		 * the canvas is clicked. Differs from sharedEvents click method as this method
-		 * does not have a resource object as context and does not take any object's 
-		 * position into account when calling the function passed.
+		 * Adds action to canvasEvents.click[] Array to be called anytime
+		 * the canvas is clicked.
 		 *
 		 * @param action = {Function} to be called when canvas is clicked
 		**/
 		click:function(action) {
 			Lib.canvasEvents.click.push(action);
 		},
-		emit:function(e,args) {
-			args = args || [];
-			if(!(args instanceof Array)) args = [args];
-			if(!Lib.customevents[e]) Lib.customevents[e] = [];
-			for(var i=0;i<Lib.customevents[e].length;i++) {
-				Lib.customevents[e][i].apply(Lib,args);
+
+		/**
+		 * Emits user-created events stored in Lib.customevents{}
+		 *
+		 * @param eventName = {String}	to be called when canvas is clicked
+		 * @param arguments	= {Array} 	of arguments that get passed as individual parameters
+		 *								to functions called when eventName is emitted.
+		**/
+		emit:function(eventName, arguments) {
+			// make sure arguments is defined
+			arguments = arguments || [];
+
+			// if a single argument is passed, put it as single index in array
+			if(!(arguments instanceof Array)) {
+				arguments = [arguments];
+			}
+
+			// if eventName has not been used before, create it
+			if(!Lib.customevents[eventName]) {
+				Lib.customevents[eventName] = [];
+			}
+
+			// loop through each function in current user-emitted event
+			// and call it, applying Lib as context and passing all arguments
+			for(var i = 0; i < Lib.customevents[eventName].length; i++) {
+				Lib.customevents[eventName][i].apply(Lib,arguments);
 			}
 		},
 		on:function(e,fn) {
@@ -566,7 +584,7 @@ var Lib = {
 		getCanvas:function() {
 			return Lib.canvas;
 		},
-		getCTX:function() {
+		getContext:function() {
 			return Lib.ctx;
 		},
 		getObject:function(a) {
