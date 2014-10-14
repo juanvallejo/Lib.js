@@ -550,16 +550,16 @@ var Lib = {
 		 * Emits user-created events stored in Lib.customevents{}
 		 *
 		 * @param eventName = {String}	to be called when canvas is clicked
-		 * @param arguments	= {Array} 	of arguments that get passed as individual parameters
+		 * @param args	= {Array} 	of arguments that get passed as individual parameters
 		 *								to functions called when eventName is emitted.
 		**/
-		emit:function(eventName, arguments) {
-			// make sure arguments is defined
-			arguments = arguments || [];
+		emit:function(eventName, args) {
+			// make sure 'args' is defined
+			args = args || [];
 
 			// if a single argument is passed, put it as single index in array
-			if(!(arguments instanceof Array)) {
-				arguments = [arguments];
+			if(!(args instanceof Array)) {
+				args = [args];
 			}
 
 			// if eventName has not been used before, create it
@@ -568,9 +568,9 @@ var Lib = {
 			}
 
 			// loop through each function in current user-emitted event
-			// and call it, applying Lib as context and passing all arguments
+			// and call it, applying Lib as context and passing all args
 			for(var i = 0; i < Lib.customevents[eventName].length; i++) {
-				Lib.customevents[eventName][i].apply(Lib,arguments);
+				Lib.customevents[eventName][i].apply(Lib, args);
 			}
 		},
 		on:function(e,fn) {
