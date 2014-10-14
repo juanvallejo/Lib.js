@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="css/reset.css"/>
 <link rel="stylesheet" href="css/styles.css"/>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-<script src="Lib.js"></script>
+<script src="../Lib.js"></script>
 <script src="data/data.js"></script>
 <script>
 window.onload = function() {
@@ -21,14 +21,14 @@ window.onload = function() {
 	}
 	Lib().setCanvas(canvas[0]);
 	Lib("loader").sprite({
-		src:'graphics/loader.png',
+		src:'../graphics/loader.png',
 		size:[128,128],
 		x:'center',
 		y:'center'
 	});
 	Lib().setCanvas(canvas[canvas.length-1]);
 	Lib("guy").sprite({
-		src:"graphics/guy2.png",
+		src:"../graphics/guy2.png",
 		size:[50,100],
 		position:[0,200],
 		speed:70,
