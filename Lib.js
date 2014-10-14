@@ -105,7 +105,7 @@ Sprite.prototype.update = function(dt) {
  * the current frame and the last frame. This is used to calculate the current frame on the
  * spritesheet. 
  *
- * @param ctx = 
+ * @param ctx = 2D Canvas rendering context
 **/
 Sprite.prototype.render = function(ctx) {
 	var max = this.frames.length;								// max number of frames to display
@@ -257,12 +257,21 @@ var Lib = {
         	if(typeof a == 'function') this.renderings.push(a);
         	else throw 'Parameter must be a function for this method.';
         },
-		click:function(a) {
+
+        /**
+         * Assigns a specified click action to current sprite object by adding it to
+         * the object's key-entry array in the library's eventQueue object.
+         * If the sprite object has not loaded when the click action is assigned by the user,
+         * the eventQueue will be in charge of calling such action once the object does load.
+         *
+         * @param action = {Function} to be called when 'click' event is detected on object
+        **/
+		click:function(action) {
 			requireID();
 			if(!Lib.eventQueue[this.id]) Lib.eventQueue[this.id] = [];
-			Lib.eventQueue[this.id].push(a);
+			Lib.eventQueue[this.id].push(action);
 			if(Lib.loaded && Lib.entities[this.id] || this.loaded) {
-				Lib.sharedEvents.click.call(this, a);
+				Lib.events.addClickActionTo(this, action);
 			}
 		},
 		freeze:function() {
@@ -333,19 +342,6 @@ var Lib = {
 		}
 	},
 	sharedEvents:{
-		click:function(a) {
-			var self = this;
-			Lib.canvasEvents.click.push(function(e) {
-				var pageX = e.pageX - Lib.canvas.getBoundingClientRect().left;		// get position of current object with respect...
-				var pageY = e.pageY - Lib.canvas.getBoundingClientRect().top;		// ...to the canvas's position on the page
-				
-				// if cursor is within the boundaries of our object on canvas click event,
-				// call all of this object's functions assigned to its 'click' event
-				if((pageX >= self.getX() - self.getOffsetX() && pageX <= self.getX() - self.getOffsetX() + self.size[0]) && (pageY >= self.getY() - self.getDetachedY() && pageY <= self.getY() - self.getDetachedY() + self.size[1])) {
-					a.call(self, e);
-				}
-			});
-		},
 		decreaseX:function(a) {
 			if(a) this.x -= (this.speed * time.dt) * a;
 			else this.x -= this.speed * time.dt;
@@ -463,6 +459,32 @@ var Lib = {
 		}
 	},
 	events:{
+		/**
+	     * Adds wrapper function with condition so that passed function is called only
+	     * when click a event happens within the coordinates of the object passed.
+	     * Created wrapper function is then added to the canvasEvents.click[] array.
+	     *
+	     * @param object = {Lib Object}	object to apply onClick action to
+	     * @param action = {Function}	written by user to execute on object click
+	    **/
+		addClickActionTo:function(object, action) {
+			var self = object;
+
+			//create wrapper function with coordinate condition
+			Lib.canvasEvents.click.push(function(e) {
+				var pageX = e.pageX - Lib.canvas.getBoundingClientRect().left;		// get position of current object with respect...
+				var pageY = e.pageY - Lib.canvas.getBoundingClientRect().top;		// ...to the canvas's position on the page
+
+				// if cursor is within the boundaries of our object on canvas click event,
+				// call all of this object's functions assigned to its 'click' event
+				if(
+					(pageX + self.getOffsetX() >= self.getX() && pageX + self.getOffsetX() <= self.getX() + self.size[0]) &&
+						(pageY + self.getOffsetY() >= self.getY() && pageY + self.getOffsetY() <= self.getY() + self.size[1])
+				) {
+					action.call(self, e);
+				}
+			});
+		},
 		addInputRule:function(a) {
 			Lib.inputRules.push(a);
 		},
@@ -477,7 +499,8 @@ var Lib = {
 				var greatestIndex = -1;
 				var greatestIndexIndex = -1;
 				var leastIndex = -1;
-				var leasrIndexIndex
+				var leasrIndexIndex;
+
 				for(var i=0;i<objects.length;i++){
 					if(objects[i].index && leastIndex == -1) {
 						leastIndexIndex = objects.indexOf(objects[i]);
@@ -602,39 +625,53 @@ var Lib = {
 			Lib.externalRenderings.push(a);
 		},
 		reset:function() {
-			debug._reset = true;
+
 			Lib.canvas.getContext("2d").clearRect(0,0,Lib.canvas.width,Lib.canvas.height);
+
 			time.dt = null;
 			time.now = Date.now();
 			time.last = Date.now();
 			time.ellapsed = 0;
+
+			debug._reset = true;
 			debug._mainCalled = false;
 			debug.logfps = false;
 			debug.runAnimation = true;
 			debug.useSingleCanvasMode = false;
+
 			Lib.canvases = [];
 			Lib.canvas = null;
+			Lib.customevents = {};
 			Lib.ctx = null;
+			Lib.detached = [];
 			Lib.entities = {};
 			Lib.entityExists = {};
 			Lib.entityReadyEvents = {};
 			Lib.eventQueue = {};
 			Lib.extensions = {};
+			Lib.externalRenderings = [];
 			Lib.id = null;
 			Lib.keys = {};
 			Lib.loaded = false;
 			Lib.inputRules = [];
 			Lib.objects = [];
-			Lib.pending = {length:0};
-			Lib.readyEvents = [];
-			Lib.resources = {};
+			Lib.offset.x = 0;									// clear canvas offset in the vertical direction
+			Lib.offset.y = 0;									// clear canvas offset in the horizontal direction
+			Lib.pending = {length:0};							// remove functions that fire once their respective object is ready
+			Lib.readyEvents = [];								// remove functions that execute on Lib.js 'ready' state
+			Lib.resources = {};									// clear resources cache
+
+			// reset every field back to an empty array
+			for(var i in Lib.canvasEvents) {
+				Lib.canvasEvents[i] = [];
+			}
 		},
 		resume:function() {
 			debug._paused = false;
 			main();
 		},
-		resumeAnimation:function(c) {
-			var canvas = c || Lib.canvases[Lib.canvas._index];
+		resumeAnimation:function(canvas) {
+			canvas = canvas || Lib.canvases[Lib.canvas._index];
 			if(!canvas.runAnimation) { ////--
 				canvas.runAnimation = true;
 			
@@ -644,8 +681,8 @@ var Lib = {
 				}
 			}
 		},
-		stopAnimation:function(c) {
-			var canvas = c || Lib.canvases[Lib.canvas._index];
+		stopAnimation:function(canvas) {
+			canvas = canvas || Lib.canvases[Lib.canvas._index];
 			if(canvas.runAnimation) {
 				canvas.runAnimation = false;
 
@@ -896,8 +933,8 @@ var Lib = {
 
 			// finish adding default sprite settings such as spritesheet 2D canvas context,
 			// and image information.
-			settings._index = Lib.canvases.length-1;
-			settings.id = Lib.id;
+			settings._index = Lib.canvases.length-1;			// index of current canvas being used (in array of canvases)
+			settings.id = Lib.id;								// current global id context, assigned to our current object
 			settings.settings = settings;						// circular pointer to settings to add support to old methods
 			settings.canvas = Lib.canvas;						// pointer to our main canvas
 			settings.ctx = Lib.canvas.getContext("2d");			// shortcut to our 2D canvas context for drawing to screen
@@ -924,6 +961,7 @@ var Lib = {
 			Lib.pending[Lib.id] = settings;						// store settings as key-value pair to global dictionary of
 																// pending objects using id as key
 
+			// assign the {Image} @return value of getImageFromURL() {Function} to settings.image
 			settings.image = getImageFromURL(settings.src,function(image) {
 				var self = settings;							// assign pointer to settings for readability. (self == settings)
 
@@ -1013,10 +1051,9 @@ var Lib = {
 					Lib.entities[self.id].hasEvent = true;		// our object has an event. Set flag accordingly.
 
 					// loop through all queued events, assign them a context of our current
-					// object, and pass them to our objectClickEventParser function 'click'
-					// under sharedEvents to be added to our array of canvas click events.
+					// object, and pass them to our addClickActionTo function
 					for(var i = 0; i < events.length; i++) {
-						Lib.sharedEvents.click.call(self, events[i]);
+						Lib.events.addClickActionTo(self, events[i]);
 					}
 				}
 
