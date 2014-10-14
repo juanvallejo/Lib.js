@@ -14,10 +14,10 @@ background:rgb(28,30,29); font:normal 16px 'Marcellus',sans-serif; color:rgb(228
 
 #top {
 width:100%; height:50px; background:rgba(16,16,16,0.35)/*rgb(148,72,57) rgb(228,230,230)*/; border-bottom:0 solid rgb(41,41,41)/*rgb(166,151,151)*/; position:relative;
-box-shadow:inset 0 -3px 0 rgb(16,16,16);
+box-shadow:inset 0 -1px 0 rgb(16,16,16);
 }
 	#brand {
-	min-width:10px; padding:9px 9px 9px 20px; text-align:left; margin:0; font-style:italic; font-family:'Molle'; font-size:1.6em; color:rgb(191,107,90); text-shadow:0 1px 0 rgb(92,45,36); position:absolute; cursor:default;
+	min-width:10px; padding:9px 9px 9px 20px; text-align:left; margin:0; font-style:italic; font-family:'Molle'; font-size:1.6em; color:rgb(233,234,233); text-shadow:0 0 0 rgb(92,45,36); position:absolute; cursor:default;
 	}
 	#menu {
 	width:173px; height:100%; margin:0 auto; color:black;
@@ -50,7 +50,7 @@ width:94%; margin:12px auto 50px auto;
 			#syntax pre {
 			font-family:'Source Code Pro'; text-align:left; line-height:1.8em; display:block; margin:0; font-size:0.85em; padding:7px 0 7px 15px;
 			border-bottom:1px dashed rgb(64,70,64); border-left:1px dashed rgb(64,70,64); background:rgba(16,17,16,0.55);
-			box-shadow: inset 1px -2px 3px rgb(16,16,16);
+			box-shadow:inset 1px -2px 3px rgb(16,16,16);
 			}
 				#syntax pre b {
 				color:rgb(221,235,151);
@@ -81,8 +81,8 @@ width:94%; margin:12px auto 50px auto;
 		font-size:2em; padding-top:20px; text-align:center; color:rgb(163,168,166); text-shadow:0 -1px 0 rgb(0,0,0);
 		}
 	#sidebar {
-	float:left; width:220px; min-height:200px; border-right:1px solid rgb(64,70,64); margin:50px 0 0; padding:20px 0 0 0;
-	box-shadow:inset -1px 0 0 rgb(16,16,16);
+	float:left; width:210px; min-height:200px; border-right:1px solid rgb(40,43,40); margin:50px 0 0; padding:20px 0 0 0;
+	box-shadow:inset 0 0 0 rgb(16,16,16);
 	}
 		#sidebar ul {
 		width:100%; display:block; float:left;
@@ -109,9 +109,9 @@ width:94%; margin:12px auto 50px auto;
 		float:left; width:100%; height:100px; margin:20px 0 0 0; text-align:justify; color:rgb(202,204,204); text-shadow:0 -1px 0 black;
 		}
 			#footer {
-			width:100%; clear:both; float:left; min-height:10px; margin-top:50px; padding:20px 0 50px 0; border-top:1px solid rgb(64,70,64);
+			width:100%; clear:both; float:left; min-height:10px; margin-top:50px; padding:20px 0 50px 0; border-top:1px solid rgb(40,43,40);
 			text-align:center; font-size:0.9em;
-			box-shadow:0 -1px 0 rgb(16,16,16);
+			box-shadow:0 0 0 rgb(16,16,16);
 			}
 			.doc-box-subtitle {
 			font-size:1.1em; float:left; margin:0 0 10px 0; color:rgb(163,168,166); clear:both; text-align:left; color:rgb(148,72,57);
@@ -142,8 +142,9 @@ width:94%; margin:12px auto 50px auto;
 					}
 				.doc-box pre {
 				font-family:'Source Code Pro'; text-align:left; line-height:1.8em; display:block; margin:25px 0 25px 0; font-size:0.9em; padding:15px 15px 15px 15px; clear:both;
-				border-bottom:1px dashed rgb(64,70,64); border-left:1px dashed rgb(64,70,64); word-wrap:break-word; width:769px; max-width:769px; background:rgba(16,17,16,0.55);
-				box-shadow: inset 1px -2px 3px rgb(16,16,16);
+				border-bottom:0 dashed rgb(64,70,64); border-left:0 dashed rgb(64,70,64); word-wrap:break-word; width:769px; max-width:769px; background:rgba(16,17,16,0.55);
+				box-shadow:inset 0 -1px 1px rgb(16,16,16);
+				border-radius:5px;
 				}
 				.doc-box samp {
 				font-family:'Source Code Pro'; color:rgb(145,216,249);
@@ -169,7 +170,7 @@ width:94%; margin:12px auto 50px auto;
 				.doc-box-demo {
 				width:800px; margin:25px 0 25px 0; clear:both; padding:15px 0 15px 20px;
 				width:100%; max-width:800px; background:rgba(16,17,16,0.55); position:relative;
-				box-shadow: inset 1px -2px 3px rgb(16,16,16); float:left;
+				box-shadow:inset 1px -2px 3px rgb(16,16,16); float:left;
 				}
 					.doc-box-demo canvas {
 					width:780px; z-index:999; position:relative;
@@ -201,7 +202,7 @@ width:94%; margin:12px auto 50px auto;
 				.doc-box-des pre {
 				font-family:'Source Code Pro'; text-align:left; line-height:1.8em; float:left; margin-top:1px; font-size:0.85em; padding:15px; clear:both;
 				border-bottom:1px dashed rgb(64,70,64); border-left:1px dashed rgb(64,70,64); word-wrap:break-word; width:769px; max-width:769px; background:rgba(16,17,16,0.55);
-				box-shadow: inset 1px -2px 3px rgb(16,16,16);
+				box-shadow:inset 1px -2px 3px rgb(16,16,16);
 				}
 .note {
 width:500px; height:350px; background:/*rgb(44,100,110)*/; margin:70px 0 0 80px; position:relative; border-width:0 0 1px 0; border-style:solid; border-color:rgb(16,16,16);
@@ -213,7 +214,7 @@ float:left; padding:25px; color:rgb(163,168,166); text-align:center; text-shadow
 	.note-back {
 	background:rgba(16,17,16,0.55); border-color:rgb(93,45,36); text-shadow:0 1px 0 rgb(191,107,90);
 	border-left:0px solid rgb(16,16,16); border-bottom:0;
-	box-shadow: inset 2px 2px 3px rgb(16,16,16);
+	box-shadow:inset 2px 2px 3px rgb(16,16,16);
 	}
 .separator {
 width:800px; height:0; border-top:1px solid rgb(16,16,16); border-bottom:1px solid rgb(52,57,52); clear:both; margin:0 auto;
