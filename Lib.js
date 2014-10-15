@@ -278,7 +278,15 @@ var Lib = {
 			//this.stopAnimation();
 		},
 		getHeight:function() {
-			return this.spritesheet.scale ? this.spritesheet.height : this.spritesheet.size[1];
+			var height = 0;
+
+			if(!this.loaded) {
+				throw 'Lib.getHeight error: Attempted to read value of resource object that has not yet loaded.';
+			} else {
+				height = this.spritesheet.scale ? this.spritesheet.height : this.spritesheet.size[1];
+			}
+
+			return height;
 		},
 		getSpriteWidth:function() {
 			return this.spritesheet.src.width || this.settings.size[0];
@@ -290,7 +298,15 @@ var Lib = {
 			return this.spritesheet.pos[1];
 		},
 		getWidth:function() {
-			return this.spritesheet.scale ? this.spritesheet.width : this.spritesheet.size[0];
+			var width = 0;
+
+			if(!this.loaded) {
+				throw 'Lib.getWidth error: Attempted to read value of resource object that has not yet loaded.';
+			} else {
+				width = this.spritesheet.scale ? this.spritesheet.width : this.spritesheet.size[0];
+			}
+
+			return width;
 		},
 		load:function(a) {
 			requireID();
@@ -332,7 +348,7 @@ var Lib = {
 			this.spritesheet.pos[1] = a;
 		},
 		sprite:function() {
-			throw "Error: An object with that id already exists.";
+			throw "Lib.sprite error: An object with that id already exists.";
 		},
 		stopAnimation:function() {
 			this.spritesheet.runAnimation = false;
@@ -478,8 +494,8 @@ var Lib = {
 				// if cursor is within the boundaries of our object on canvas click event,
 				// call all of this object's functions assigned to its 'click' event
 				if(
-					(pageX + self.getOffsetX() >= self.getX() && pageX + self.getOffsetX() <= self.getX() + self.size[0]) &&
-						(pageY + self.getOffsetY() >= self.getY() && pageY + self.getOffsetY() <= self.getY() + self.size[1])
+					(pageX + self.getOffsetX() >= self.getX() && pageX + self.getOffsetX() <= self.getX() + self.getWidth()) &&
+						(pageY + self.getOffsetY() >= self.getY() && pageY + self.getOffsetY() <= self.getY() + self.getHeight())
 				) {
 					action.call(self, e);
 				}
