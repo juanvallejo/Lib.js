@@ -207,6 +207,9 @@ var Lib = {
         getID:function() {
 			return this.id;
 		},
+		getScale:function() {
+			return this.scale;
+		},
         getSize:function() {
         	return this.size;
         },
@@ -1039,21 +1042,21 @@ var Lib = {
 				// string to pre-defined values of 'center', 'right', 'left', 'top',
 				// and 'bottom' indicating where to draw our image on the screen.
 				if(self.x == 'center') {
-					self.x = self.canvas.width / 2 - self.size[0] / 2;
+					self.x = self.canvas.width / 2 - (self.size[0] * self.scale) / 2;
 				} else if(self.x == 'right') {
 					// draw on the right of the screen by subtracting the width of an individual frame
 					// from the total size of our canvas
-					self.x = self.canvas.width - self.size[0];
+					self.x = self.canvas.width - (self.size[0] * self.scale);
 				} else if(self.x == 'left' || !self.x || typeof self.x == 'string') {
 					self.x = 0;
 				}
 
 				// do the same for our y coordinate
 				if(self.y == 'center') {
-					self.y = self.canvas.height / 2 - self.size[1] / 2;
+					self.y = self.canvas.height / 2 - (self.size[1] * self.scale) / 2;
 				} else if(self.y == 'bottom') {
 					// subtract the height of an individual frame from the canvas height
-					self.y = self.canvas.height - self.size[1];
+					self.y = self.canvas.height - (self.size[1] * self.scale);
 				} else if(self.y == 'top' || !self.y || typeof self.y == 'string') {
 					self.y = 0;
 				}
@@ -1077,7 +1080,6 @@ var Lib = {
 				// 'click', 'mouseover', etc... manually. We simulate these by listening to such methods with
 				// the Canvas object, and mapping them to each of our objects. Below, we store user-defined actions
 				// that are to take place when such events are detected against one of our objects.
-
 				if(Lib.eventQueue[self.id]) {
 					// Check to see if any event actions have
 					// been assigned for current object id
