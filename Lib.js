@@ -940,7 +940,7 @@ var Lib = {
 				src:null,										// source of our spritesheet (*)
 				renderings:[],									// array of user functions. Called every frame with object as context
 				reverse:false,									// determines whether frameSequence array will be read in reverse
-				rotate:0,										// rotate sprite x degrees
+				rotation:0,										// rotation of sprite in x degrees
 				type:'sprite',									// type of Lib.js object being created
 				x:0,											// x position of object on game screen
 				y:0												// y position of object on game screen
@@ -1249,6 +1249,9 @@ function render() {
 			}
 			ctx.save();
 			ctx.translate(xpos,ypos);
+			if(Lib.canvases[i].objects[x].settings.rotation) {
+				ctx.rotate(Math.PI/(180/(-Lib.canvases[i].objects[x].settings.rotation)));
+			}
 			if(Lib.canvases[i].objects[x].settings.type == "sprite") { // if current object at index x is sprite
 				if(!Lib.canvases[i].objects[x].isHidden) {
 					Lib.canvases[i].objects[x].spritesheet.render(ctx);
