@@ -1249,10 +1249,17 @@ function render() {
 					ypos -= Lib.offset.y;						// decrease ypos by current object's vertical offset from screen
 				}
 			}
+
+			// save current canvas display coords
 			ctx.save();
+
+			// translate the canvas according to object coords
 			ctx.translate(xpos,ypos);
+
+			// check whether current object has a rotation angle set
 			if(Lib.canvases[i].objects[x].settings.rotation) {
-				ctx.rotate(Math.PI/(180/(-Lib.canvases[i].objects[x].settings.rotation)));
+				// rotate the canvas by current object rotation value relative to PI = 180 degrees in the unit circle
+				ctx.rotate(Math.PI / (180 / (-Lib.canvases[i].objects[x].settings.rotation)));
 			}
 			if(Lib.canvases[i].objects[x].settings.type == "sprite") { // if current object at index x is sprite
 				if(!Lib.canvases[i].objects[x].isHidden) {
