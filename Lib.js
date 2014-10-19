@@ -239,20 +239,22 @@ var Lib = {
             return Lib.offset.y;
         },
 		increaseOffsetX:function(a) {
-			if(a) Lib.offset.x += (this.speed * time.dt) * a;
-			else Lib.offset.x += this.speed * time.dt;
+			if(a) Lib.offset.x += Math.round(((this.speed * time.dt) * a * 1000) / 1000);
+			else Lib.offset.x += Math.round(this.speed * time.dt);
 		},
 		increaseOffsetY:function(a) {
-			if(a) Lib.offset.y += (this.speed * time.dt) * a;
-			else Lib.offset.y += this.speed * time.dt;
+			if(a) Lib.offset.y += Math.round(((this.speed * time.dt) * a * 1000) / 1000);
+			else Lib.offset.y += Math.round(this.speed * time.dt);
+			console.log(Lib.offset.y)
 		},
 		decreaseOffsetX:function(a) {
-			if(a) Lib.offset.x -= (this.speed * time.dt) * a;
-			else Lib.offset.x -= this.speed * time.dt;
+			if(a) Lib.offset.x -= Math.round(((this.speed * time.dt) * a * 1000) / 1000);
+			else Lib.offset.x -= Math.round(this.speed * time.dt);
 		},
 		decreaseOffsetY:function(a) {
-			if(a) Lib.offset.y -= (this.speed * time.dt) * a;
-			else Lib.offset.y -= this.speed * time.dt;
+			if(a) Lib.offset.y -= Math.round(((this.speed * time.dt) * a * 1000) / 1000);
+			else Lib.offset.y -= Math.round(this.speed * time.dt);
+
 		},
         isDetached:function(){
             return (this._detachIndex ? true : false);
