@@ -168,6 +168,7 @@ var Lib = {
 	keys:{},
 	loaded:false,
 	objects:[],
+	objectsByPosition:[],										// contains a dictionary with arrays of objects at specific positions
 	offset:{
     	x:0,													// holds the current [screen] offset
     	y:0
@@ -407,6 +408,30 @@ var Lib = {
 		increaseY:function(a) {
 			if(a) this.y += (this.speed * time.dt) * a;
 			else this.y += this.speed * time.dt;
+		},
+
+		/**
+		 * checks to see if position of object matches position of another object
+		 * on the canvas
+		 *
+		 * @param object = {Libjs#Object} to check for collisions with other objects
+		 */
+		intersectsWith:function(object) {
+
+		},
+
+		/**
+		 * checks to see if position of object matches position of another object
+		 * containing property specified by @param property
+		 *
+		 * @param property = {String} specifying object property to search for
+		 */
+		intersectsWithProperty:function(property) {
+			if(Lib.objectsByPosition[this.getX() + ',' + this.getY()]) {
+				console.log('intersection');
+				console.log(Lib.objectsByPosition[this.getX() + ',' + this.getY()]);
+			}
+			// console.log(this.getOffsetX() + ' / ' + );
 		},
 		load:function(a) {
 			a.call(this);
@@ -692,6 +717,7 @@ var Lib = {
 			Lib.loaded = false;
 			Lib.inputRules = [];
 			Lib.objects = [];
+			Lib.objectsByPosition = []							// resets dictionary with arrays of objects at specific positions
 			Lib.offset.x = 0;									// clear canvas offset in the vertical direction
 			Lib.offset.y = 0;									// clear canvas offset in the horizontal direction
 			Lib.pending = {length:0};							// remove functions that fire once their respective object is ready
@@ -941,6 +967,7 @@ var Lib = {
 				speed:100,										// translation speed of object accross canvas
 				spritesheet:null,								// Sprite object containing sprite animation render data
 				src:null,										// source of our spritesheet (*)
+				storebyposition:true,							// tells if object should be stored in Lib.objectsByPosition
 				renderings:[],									// array of user functions. Called every frame with object as context
 				reverse:false,									// determines whether frameSequence array will be read in reverse
 				rotation:0,										// rotation of sprite in x degrees
@@ -996,12 +1023,25 @@ var Lib = {
 				if(!settings[i]) settings[i] = methods[i];
 			}
 
-			Lib.pending.length++;								// increase the length of our pending objects collection
-			Lib.pending[Lib.id] = settings;						// store settings as key-value pair to global dictionary of
+			// add new object to pending-object array
+			Lib.pending.length++;								// Increase the length of our pending objects collection
+			Lib.pending[Lib.id] = settings;						// Store settings as key-value pair to global dictionary of
 																// pending objects using id as key
 
+			// store object by its position unless told not to by user setting
+			if(settings.storebyposition) {
+				// check to see if position entry has been initialized before
+				if(!Lib.objectsByPosition[Math.round(settings.x) + ',' + Math.round(settings.y)]) {
+					// if not, initialize to array 
+					Lib.objectsByPosition[Math.round(settings.x) + ',' + Math.round(settings.y)] = [];
+				}
+
+				// store our object (by storing its settings)
+				Lib.objectsByPosition[Math.round(settings.x) + ',' + Math.round(settings.y)].push(settings);
+			}
+
 			// assign the {Image} @return value of getImageFromURL() {Function} to settings.image
-			settings.image = getImageFromURL(settings.src,function(image) {
+			settings.image = getImageFromURL(settings.src, function(image) {
 				var self = settings;							// assign pointer to settings for readability. (self == settings)
 
 				// make sure we have a frame size array defined
