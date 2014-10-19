@@ -245,7 +245,6 @@ var Lib = {
 		increaseOffsetY:function(a) {
 			if(a) Lib.offset.y += Math.round(((this.speed * time.dt) * a * 1000) / 1000);
 			else Lib.offset.y += Math.round(this.speed * time.dt);
-			console.log(Lib.offset.y)
 		},
 		decreaseOffsetX:function(a) {
 			if(a) Lib.offset.x -= Math.round(((this.speed * time.dt) * a * 1000) / 1000);
@@ -429,11 +428,21 @@ var Lib = {
 		 * @param property = {String} specifying object property to search for
 		 */
 		intersectsWithProperty:function(property) {
-			if(Lib.objectsByPosition[this.getX() + ',' + this.getY()]) {
-				console.log('intersection');
-				console.log(Lib.objectsByPosition[this.getX() + ',' + this.getY()]);
+			// loop through every object on the map
+			for(var i = 0; i < Lib.objects.length; i++) {
+				// check for collisions with object
+				if(	this.getDetachedX() + this.getWidth() >= Lib.objects[i].getX() && 
+					this.getDetachedX() <= Lib.objects[i].getX() + Lib.objects[i].getWidth() &&
+					this.getDetachedY() + this.getHeight() >= Lib.objects[i].getY() &&
+					this.getDetachedY() <= Lib.objects[i].getY() + Lib.objects[i].getHeight()
+				) {
+					// check to see that intersected object contains property
+					if(Lib.objects[i][property]) {
+						// exit with true if object does contain property
+						return true;
+					}
+				}
 			}
-			// console.log(this.getOffsetX() + ' / ' + );
 		},
 		load:function(a) {
 			a.call(this);
@@ -1296,13 +1305,14 @@ function render() {
 			ctx.save();
 
 			// translate the canvas according to object coords
-			ctx.translate(xpos,ypos);
+			ctx.translate(xpos, ypos);
 
 			// check whether current object has a rotation angle set
 			if(Lib.canvases[i].objects[x].settings.rotation) {
 				// rotate the canvas by current object rotation value relative to PI = 180 degrees in the unit circle
 				ctx.rotate(Math.PI / (180 / (-Lib.canvases[i].objects[x].settings.rotation)));
 			}
+
 			if(Lib.canvases[i].objects[x].settings.type == "sprite") { // if current object at index x is sprite
 				if(!Lib.canvases[i].objects[x].isHidden) {
 					Lib.canvases[i].objects[x].spritesheet.render(ctx);
