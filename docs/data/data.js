@@ -13,42 +13,71 @@ var Site = {
 		return html;
 	},
 	manageMenuLabels:function() {
-		if(!document.getElementById("menu")) return;
-		var arr = document.getElementById("menu").children[0].children;
-		var li = [];
-		for(var i=0;i<arr.length;i++) {
-			li[i] = arr[i];
+
+		if(!document.getElementsByClassName("menu")) {
+			return;
 		}
-		li.push(document.getElementById("contact").children[0].children[0]);
-		li[0].style.backgroundPosition = "6px 6px";
-		li[1].style.backgroundPosition = "-39px 6px";
-		li[2].style.backgroundPosition = "-125px 5px";
-		li[3].style.backgroundPosition = "-80px 3px";
+
+		var arr = document.getElementsByClassName("menu");
+		var li 	= [];
+		
+		for(var x = 0; x < arr.length; x++) {
+
+			var liNodes = arr[x].children[0].children;
+
+			for(var i=0;i<liNodes.length;i++) {
+				li.push(liNodes[i]);
+			}
+
+		}
+
+		li.forEach(function(listElement, index) {
+
+			var iconClassName 	= 'fa-circle-o';
+			var iconType 		= listElement.dataset.href;
+
+			var iconDefinitions	= [
+				'fa-book',
+				'fa-cloud-download',
+				'fa-gamepad',
+				'fa-envelope'
+			];
+
+			iconClassName = iconDefinitions[index] || iconClassName;
+
+			listElement.innerHTML = '<span class="fa ' + iconClassName + ' fa-lg">';
+
+		});
+
 		for(var i=0;i<li.length;i++) {
 			li[i].addEventListener('mouseover',function() {
+
 				if(!this.hasLabel) {
+
 					this.hasLabel = true;
 					this.label = document.createElement("div");
 					this.label.className = "label";
 					this.appendChild(this.label);
 					this.label.style.bottom = (-(this.label.clientHeight))+"px";
 				}
+
 				this.label.style.left = (this.clientWidth / 2 - this.label.clientWidth / 2)+"px";
 				this.label.style.opacity = "0.7";
 				this.label.innerHTML = this.dataset.label || this.getAttribute('data-label');
 				this.label.style.bottom = (-(this.label.clientHeight))+"px";
+
 			});
 			li[i].addEventListener('mouseout',function() {
 				this.label.style.opacity = "0.0";
 				this.label.innerHTML = "";
 			});
 			li[i].addEventListener('click',function() {
-				var link = this.children[0].innerHTML;
+				var link = this.dataset.href || this.getAttribute('data-href');
 				if(link == "contact") {
 					window.location.href = "mailto:juuanv@gmail.com";
 				} else if(link == "Thanks For Your Support!") {
 					//Thanks for supporting Lib.js! Have an imaginary internet brownie!
-				} else window.location.href = link+".html";
+				} else window.location.href = link + '.html';
 			});
 		}
 		document.getElementById("brand").addEventListener('click',function() {

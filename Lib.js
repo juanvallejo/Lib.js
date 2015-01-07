@@ -12,9 +12,6 @@
 * Such events are separated for modularity and readability in one file. Shared methods are functions that
 * are general enough to apply to all three types of Lib.js objects.
 *
-* Note: Include important notes on program here.
-*
-* Important: Include anything needed to run / dependencies required here.
 **/
 
 (function() {
@@ -973,7 +970,7 @@ var Lib = {
 				loaded:false,									// indicates whether image resource has loaded for our object
 				logfps:false,									// flag for toggling console log output of framerate rendering
 				position:[0,0],									// defined by @param position
-				scale:null,										// value >= 0.1 to scale image by
+				scale:1,										// value >= 0.1 to scale image by
 				size:null,										// defined by @param frameSize
 				speed:100,										// translation speed of object accross canvas
 				spritesheet:null,								// Sprite object containing sprite animation render data
