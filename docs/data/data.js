@@ -72,7 +72,7 @@ var Site = {
 				this.label.innerHTML = "";
 			});
 			li[i].addEventListener('click',function() {
-				var link = this.dataset.href || this.getAttribute('data-href');
+				var link = this.dataset.label || this.getAttribute('data-label');
 				if(link == "contact") {
 					window.location.href = "mailto:juuanv@gmail.com";
 				} else if(link == "Thanks For Your Support!") {
