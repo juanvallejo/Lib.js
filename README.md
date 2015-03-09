@@ -17,7 +17,7 @@ the `graphics` folder contains sprite and non-sprite images you can use to furth
 
 - [Lib.js](https://github.com/juanvallejo/Lib.js)
 - [Node.js](http://nodejs.org/)
-- [socket.io]()
+- [socket.io](http://socket.io/)
 
 Before this game can be run, you must have the dependencies listed above. To install these dependencies, see below for your operating system.
 
